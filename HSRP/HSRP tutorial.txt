@@ -1,0 +1,280 @@
+$ ./start-1.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        100:0/0@roameo
+Port 0/1 is connected to:
+        20:0/0
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: yes
+
+At any point you may enter a question mark '?' for help.
+Use ctrl-c to abort configuration dialog at any prompt.
+Default settings are in square brackets '[]'.
+
+Basic management setup configures only enough connectivity
+for management of the system, extended setup will ask you
+to configure each interface on the system
+
+Would you like to enter basic management setup? [yes/no]: yes
+Configuring global parameters:
+
+  Enter host name [Router]: R10
+
+  The enable secret is a password used to protect access to
+  privileged EXEC and configuration modes. This password, after
+  entered, becomes encrypted in the configuration.
+  Enter enable secret: cisco
+
+  The enable password is used when you do not specify an
+  enable secret password, with some older software versions, and
+  some boot images.
+  Enter enable password: password
+
+  The virtual terminal password is used to protect
+  access to the router over a network interface.
+  Enter virtual terminal password: password
+  Configure SNMP Network Management? [yes]: no
+
+Current interface summary
+
+
+Any interface listed with OK? value "NO" does not have a valid configuration
+
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                unassigned      NO  unset  up                    up
+Ethernet0/1                unassigned      NO  unset  up                    up
+...
+
+Enter interface name used to connect to the
+management network from the above interface summary: Ethernet0/1
+
+Configuring interface Ethernet0/1:
+  Configure IP on this interface? [yes]: no
+
+The following configuration command script was created:
+
+hostname R10
+enable secret 5 $1$2mqf$LOhyR99VvCjxNfFFEWIHc/
+enable password password
+line vty 0 4
+password password
+no snmp-server
+!
+no ip routing
+
+!
+interface Ethernet0/0
+shutdown
+no ip address
+!
+...
+end
+
+
+[0] Go to the IOS command prompt without saving this config.
+[1] Return back to the setup without saving this config.
+[2] Save this configuration to nvram and exit.
+
+Enter your selection [2]: 2
+Building configuration...
+Use the enabled mode 'configure' command to modify this configuration.
+
+
+Press RETURN to get started!
+
+
+...
+*Aug 24 16:08:44.951: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet1/3, changed state to down
+*Aug 24 16:08:45.111: %IP-5-WEBINST_KILL: Terminating DNS process
+*Aug 24 16:08:51.047: %SYS-5-RESTART: System restarted --
+Cisco IOS Software, Linux Software (I86BI_LINUX-IPBASE-M), Experimental Version 12.4(20090407:185408) [yuiu-redbuild-V124_24_5_6_PIC1 166]
+Copyright (c) 1986-2009 by Cisco Systems, Inc.
+Compiled Wed 08-Apr-09 01:29 by yuiu
+*Aug 24 16:08:51.047: %SNMP-5-COLDSTART: SNMP agent on host R10 is undergoing a cold start
+R10>enable
+Password:
+R10#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+R10(config)#interface Ethernet0/1
+R10(config-if)#ip address 10.0.0.10 255.255.255.0
+R10(config-if)#standby 1 priority 110
+R10(config-if)#standby 1 preempt
+R10(config-if)#standby 1 authentication md5 key-string password12345
+R10(config-if)#standby 1 ip 10.0.0.100
+R10(config-if)#end
+R10#
+*Aug 24 16:10:12.411: %SYS-5-CONFIG_I: Configured from console by console
+...
+R10#show standby
+Ethernet0/1 - Group 1
+  State is Listen
+  Virtual IP address is 10.0.0.100
+  Active virtual MAC address is unknown
+    Local virtual MAC address is 0000.0c07.ac01 (v1 default)
+  Hello time 3 sec, hold time 10 sec
+  Authentication MD5, key-string
+  Preemption enabled
+  Active router is unknown
+  Standby router is unknown
+  Priority 110 (configured 110)
+  Group name is "hsrp-Et0/1-1" (default)
+R10#
+*Aug 24 16:10:41.903: %HSRP-5-STATECHANGE: Ethernet0/1 Grp 1 state Standby -> Active
+R10#
+*Aug 24 16:11:59.575: %HSRP-4-BADAUTH: Bad authentication from 10.0.0.20, group 1, remote state Speak
+
+R10#show interfaces
+Ethernet0/0 is up, line protocol is up
+  Hardware is AmdP2, address is 0e00.03e8.0a00 (bia 0e00.03e8.0a00)
+  ...
+*Aug 24 16:15:06.959: %HSRP-4-BADAUTH: Bad authentication from 10.0.0.20, group 1, remote state Active
+
+
+$ ./start-2.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        10:0/1
+
+              Restricted Rights Legend
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: yes
+
+At any point you may enter a question mark '?' for help.
+Use ctrl-c to abort configuration dialog at any prompt.
+Default settings are in square brackets '[]'.
+
+Basic management setup configures only enough connectivity
+for management of the system, extended setup will ask you
+to configure each interface on the system
+
+Would you like to enter basic management setup? [yes/no]: yes
+Configuring global parameters:
+
+  Enter host name [Router]: R20
+
+  The enable secret is a password used to protect access to
+  privileged EXEC and configuration modes. This password, after
+  entered, becomes encrypted in the configuration.
+  Enter enable secret: cisco
+
+  The enable password is used when you do not specify an
+  enable secret password, with some older software versions, and
+  some boot images.
+  Enter enable password: password
+
+  The virtual terminal password is used to protect
+  access to the router over a network interface.
+  Enter virtual terminal password: password
+  Configure SNMP Network Management? [yes]: no
+
+Current interface summary
+
+
+Any interface listed with OK? value "NO" does not have a valid configuration
+
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                unassigned      NO  unset  up                    up
+Ethernet0/1                unassigned      NO  unset  up                    up
+Ethernet0/2                unassigned      NO  unset  up                    up
+...
+
+Enter interface name used to connect to the
+management network from the above interface summary: Ethernet0/0
+
+Configuring interface Ethernet0/0:
+  Configure IP on this interface? [yes]: no
+
+The following configuration command script was created:
+
+hostname R20
+enable secret 5 $1$uUCD$Pf02KvlFHFLk9NE/9PtRW.
+enable password password
+line vty 0 4
+password password
+no snmp-server
+!
+no ip routing
+
+!
+interface Ethernet0/0
+no shutdown
+no ip address
+no mop enabled
+!
+interface Ethernet0/1
+shutdown
+no ip address
+!
+interface Ethernet0/2
+shutdown
+no ip address
+!
+interface Ethernet0/3
+shutdown
+no ip address
+!
+interface Ethernet1/0
+shutdown
+no ip address
+!
+interface Ethernet1/1
+shutdown
+no ip address
+!
+...
+end
+
+
+[0] Go to the IOS command prompt without saving this config.
+[1] Return back to the setup without saving this config.
+[2] Save this configuration to nvram and exit.
+
+Enter your selection [2]: 2
+Building configuration...
+Use the enabled mode 'configure' command to modify this configuration.
+
+
+Press RETURN to get started!
+
+...
+R20#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+R20(config)#interface Ethernet0/0
+R20(config-if)#ip address 10.0.0.20 255.255.255.0
+R20(config-if)#standby 1 priority 100
+R20(config-if)#standby 1 preempt
+R20(config-if)#standby 1 authentication md5 key-string openwall12345
+R20(config-if)#standby 1 ip 10.0.0.100
+R20(config-if)#end
+R20#
+*Aug 24 16:11:49.187: %HSRP-4-BADAUTH: Bad authentication from 10.0.0.10, group 1, remote state Active
+R20#
+*Aug 24 16:11:50.283: %SYS-5-CONFIG_I: Configured from console by console
+R20#
+*Aug 24 16:12:11.579: %HSRP-5-STATECHANGE: Ethernet0/0 Grp 1 state Standby -> Active
+R20#
+R20#
+*Aug 24 16:12:19.195: %HSRP-4-BADAUTH: Bad authentication from 10.0.0.10, group 1, remote state Active
+R20#
+
+
+$ cat NETMAP
+10:0/1 20:0/0 1

@@ -1,0 +1,21 @@
+Locating the "bad" message string
+---------------------------------
+
+Routers keep saying something like,
+
+*Aug 31 11:37:50.255: %HSRP-4-BADAUTH: Bad authentication from 10.0.0.20, group 1, remote state Active
+
+This string resides in .rodata at 0x09CB95A4. We put a trace or a watch at this
+address in IDA Pro and soon we see a address which uses this string.
+
+Location the internal MD5 implementation
+----------------------------------------
+
+We can look for the constants used in the MD5 algorithm.
+
+http://openwall.info/wiki/_media/people/solar/software/public-domain-source-code/md5.c
+
+Searching for "0xd76aa478" (a constant used in MD5) leads us to 0x099A54B2. We
+compare this function with Solar's md5.c and see that it is "MD5_body".
+
+This looks like a standard MD5 implementation without any Cisco specific craziness.

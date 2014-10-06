@@ -1,0 +1,315 @@
+http://evilrouters.net/2009/07/04/eigrp-authentication/
+
+
+$ ./start-1.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        20:0/0
+
+              Restricted Rights Legend
+
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+Would you like to terminate autoinstall? [yes]:
+
+
+Press RETURN to get started!
+
+...
+
+Router>enable
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface loopback 0
+Router(config-if)#ip address 1.1.1.1 255.255.255.255
+...
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 172.16.12.1 255.255.255.252
+Router(config-if)#no shutdown
+Router(config-if)#end
+...
+Router#ping 172.16.12.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/4 ms
+Router#ping 172.16.12.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+Router#ping 172.16.12.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+Router#copy running-config startup-config
+Destination filename [startup-config]?
+Building configuration...
+[OK]
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router eigrp 42
+Router(config-router)#no auto-summary
+Router(config-router)#network 172.16.12.1 0.0.0.0
+Router(config-router)#network 1.1.1.1 0.0.0.0
+Router(config-router)#end
+Router#
+...
+*Sep  2 19:34:13.663: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.2 (Ethernet0/0) is up: new adjacency
+Router#sh ip route eigrp
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, + - replicated route
+
+Gateway of last resort is not set
+
+      2.0.0.0/32 is subnetted, 1 subnets
+D        2.2.2.2 [90/409600] via 172.16.12.2, 00:00:25, Ethernet0/0
+Router#
+
+Router#ping 2.2.2.2 source 1.1.1.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2.2.2.2, timeout is 2 seconds:
+Packet sent with a source address of 1.1.1.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/4 ms
+Router#
+
+
+
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#key chain EIGRP
+Router(config-keychain)#key 1
+Router(config-keychain-key)#key-string password12345
+Router(config-keychain-key)#end
+Router#
+*Sep  2 19:40:06.583: %SYS-5-CONFIG_I: Configured from console by console
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip authentication key-chain eigrp 42 EIGRP
+Router(config-if)#ip authentication mode eigrp 42 md5
+Router(config-if)#end
+Router#
+*Sep  2 19:41:00.839: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.2 (Ethernet0/0) is down: authentication mode changed
+Router#
+*Sep  2 19:41:02.215: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Sep  2 19:42:32.795: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.2 (Ethernet0/0) is up: new adjacency
+Router#ping 2.2.2.2 source 1.1.1.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2.2.2.2, timeout is 2 seconds:
+Packet sent with a source address of 1.1.1.1
+!!!!!
+
+
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#key chain EIGRP
+Router(config-keychain)#key 1
+Router(config-keychain-key)#key-string password12345
+Router(config-keychain-key)#end
+Router#
+*Sep  2 19:40:06.583: %SYS-5-CONFIG_I: Configured from console by console
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip authentication key-chain eigrp 42 EIGRP
+Router(config-if)#ip authentication mode eigrp 42 md5
+Router(config-if)#end
+Router#
+*Sep  2 19:41:00.839: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.2 (Ethernet0/0) is down: authentication mode changed
+Router#
+*Sep  2 19:41:02.215: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Sep  2 19:42:32.795: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.2 (Ethernet0/0) is up: new adjacency
+Router#ping 2.2.2.2 source 1.1.1.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2.2.2.2, timeout is 2 seconds:
+Packet sent with a source address of 1.1.1.1
+!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$ ./start-2.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        10:0/0
+
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+Would you like to terminate autoinstall? [yes]:
+
+
+Press RETURN to get started!
+...
+Router>enable
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface loopback 0
+Router(config-if)#ip address 2.2.2.2 255.255.255.255
+Router(config-if)#end
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 172.16.12.2 255.255.255.252
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#ping 172.16.12.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/4 ms
+Router#ping 172.16.12.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 172.16.12.1, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+Router#ping 172.16.12.1
+
+Router#copy running-config startup-confi
+Destination filename [startup-config]?
+Building configuration...
+[OK]
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router eigrp 42
+Router(config-router)#no auto-summary
+Router(config-router)#network 2.2.2.2 0.0.0.0
+Router(config-router)#network 172.16.12.2 0.0.0.0
+Router(config-router)#end
+Router#
+*Sep  2 19:34:13.247: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.1 (Ethernet0/0) is up: new adjacency
+*Sep  2 19:34:14.083: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#key chain EIGRP
+Router(config-keychain)#key 1
+Router(config-keychain-key)#key-string password12345
+Router(config-keychain-key)#end
+Router#
+*Sep  2 19:40:26.631: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Sep  2 19:41:00.407: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.1 (Ethernet0/0) is down: Interface PEER-TERMINATION received
+Router#debug eigrp packets
+    (UPDATE, REQUEST, QUERY, REPLY, HELLO, IPXSAP, PROBE, ACK, STUB, SIAQUERY, SIAREPLY)
+EIGRP Packet debugging is on
+Router#
+*Sep  2 19:41:41.691: EIGRP: Ethernet0/0: ignored packet from 172.16.12.1, opcode = 5 (authentication off or key-chain missing)
+*Sep  2 19:41:42.263: EIGRP: Sending HELLO on Loopback0
+*Sep  2 19:41:42.263:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+*Sep  2 19:41:42.263: EIGRP: Received HELLO on Loopback0 nbr 2.2.2.2
+*Sep  2 19:41:42.263:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0
+*Sep  2 19:41:42.263: EIGRP: Packet from ourselves ignored
+Router#
+*Sep  2 19:41:44.771: EIGRP: Sending HELLO on Ethernet0/0
+*Sep  2 19:41:44.771:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#
+...
+Router#undebug all
+All possible debugging has been turned off
+Router#
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip authentication key-chain eigrp 42 EIGRP
+Router(config-if)#ip authentication mode eigrp 42 md5
+Router(config-if)#end
+Router#
+*Sep  2 19:42:31.679: %SYS-5-CONFIG_I: Configured from console by console
+*Sep  2 19:42:32.363: %DUAL-5-NBRCHANGE: EIGRP-IPv4 42: Neighbor 172.16.12.1 (Ethernet0/0) is up: new adjacency
+Router#debug eigrp packets
+    (UPDATE, REQUEST, QUERY, REPLY, HELLO, IPXSAP, PROBE, ACK, STUB, SIAQUERY, SIAREPLY)
+EIGRP Packet debugging is on
+Router#
+*Sep  2 19:42:45.955: EIGRP: received packet with MD5 authentication, key id = 1
+*Sep  2 19:42:45.955: EIGRP: Received HELLO on Ethernet0/0 nbr 172.16.12.1
+*Sep  2 19:42:45.955:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0 peerQ un/rely 0/0
+*Sep  2 19:42:45.955: EIGRP: Receiving TIDLIST on Ethernet0/0 - 1 items 0
+*Sep  2 19:42:46.195: EIGRP: Sending TIDLIST on Ethernet0/0 - 1 items
+*Sep  2 19:42:46.195: EIGRP: Sending HELLO on Ethernet0/0
+*Sep  2 19:42:46.195:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+*Sep  2 19:42:46.455: EIGRP: Sending HELLO on Loopback0
+Router#
+*Sep  2 19:42:46.455:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+*Sep  2 19:42:46.455: EIGRP: Received HELLO on Loopback0 nbr 2.2.2.2
+*Sep  2 19:42:46.455:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0
+*Sep  2 19:42:46.455: EIGRP: Packet from ourselves ignored
+Router#
+*Sep  2 19:42:50.455: EIGRP: received packet with MD5 authentication, key id = 1
+*Sep  2 19:42:50.455: EIGRP: Received HELLO on Ethernet0/0 nbr 172.16.12.1
+*Sep  2 19:42:50.455:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0 peerQ un/rely 0/0
+*Sep  2 19:42:50.867: EIGRP: Sending HELLO on Loopback0
+*Sep  2 19:42:50.867:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+*Sep  2 19:42:50.867: EIGRP: Received HELLO on Loopback0 nbr 2.2.2.2
+*Sep  2 19:42:50.867:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0
+*Sep  2 19:42:50.867: EIGRP: Packet from ourselves ignored
+*Sep  2 19:42:50.891: EIGRP: Sending HELLO on Ethernet0/0
+Router#
+*Sep  2 19:42:50.891:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#
+*Sep  2 19:42:54.715: EIGRP: received packet with MD5 authentication, key id = 1
+*Sep  2 19:42:54.715: EIGRP: Received HELLO on Ethernet0/0 nbr 172.16.12.1
+*Sep  2 19:42:54.715:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0 peerQ un/rely 0/0
+*Sep  2 19:42:55.295: EIGRP: Sending HELLO on Ethernet0/0
+*Sep  2 19:42:55.295:   AS 42, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#
+..
+Router#undebug all
+All possible debugging has been turned off
+Router#
