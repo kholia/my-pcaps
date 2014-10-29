@@ -1,0 +1,58 @@
+$ ./start-1.sh  # BFD in HSRP
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        20:0/0
+...
+
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.4(2)T, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2014 by Cisco Systems, Inc.
+Compiled Thu 27-Mar-14 01:08 by prod_rel_team
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+Would you like to terminate autoinstall? [yes]:
+
+Press RETURN to get started!
+
+...
+
+Router>enable
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#key chain test
+Router(config-keychain)#key 1
+Router(config-keychain-key)#key-string password12345
+Router(config-keychain-key)#end
+Router#
+*Oct 29 21:26:27.068: %SYS-5-CONFIG_I: Configured from console by console
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#bfd-template single-hop test
+Router(config-bfd)#interval min-tx 100 min-rx 100 multiplier 10
+Router(config-bfd)#authentication md5 keychain test
+Router(config-bfd)#end
+Router#
+*Oct 29 21:26:54.008: %SYS-5-CONFIG_I: Configured from console by console
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 10.0.0.10 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#bfd template test
+Router(config-if)#standby 1 ip 10.0.0.100
+Router(config-if)#standby 1 preempt
+Router(config-if)#standby 1 priority 110
+Router(config-if)#end
+Router#
