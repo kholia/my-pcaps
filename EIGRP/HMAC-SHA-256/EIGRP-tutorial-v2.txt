@@ -1,0 +1,155 @@
+http://evilrouters.net/2009/07/04/eigrp-authentication/
+
+
+$ ./start-1.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        20:0/0
+
+              Restricted Rights Legend
+
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+
+Press RETURN to get started!
+
+
+*Dec  3 19:37:23.436: %CTS-6-ENV_DATA_START_STATE: Environment Data Download in start state
+*Dec  3 19:37:23.708: Installing default VOIPHA services
+
+...
+Router>en
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 10.0.0.1 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#conf t
+Router(config)#router eigrp test
+Router(config-router)#address-family ipv4 autonomous-system 10
+Router(config-router-af)#af-interface Ethernet0/0
+Router(config-router-af-interface)#authentication mod
+Router(config-router-af-interface)#authentication mode hmac-sha-256 password12345
+Router(config-router-af-interface)#exit-af-interface
+Router(config-router-af)#topology base
+Router(config-router-af-topology)#exit-af-topology
+Router(config-router-af)#network 10.0.0.0
+Router(config-router-af)#exit-address-family
+Router(config-router)#end
+Router#
+*Dec  3 19:46:12.809: %SYS-5-CONFIG_I: Configured from console by console
+Router#show
+Router#show ip eigrp interfaces detail Ethernet0/0
+EIGRP-IPv4 VR(test) Address-Family Interfaces for AS(10)
+                              Xmit Queue   PeerQ        Mean   Pacing Time   Multicast    Pending
+Interface              Peers  Un/Reliable  Un/Reliable  SRTT   Un/Reliable   Flow Timer   Routes
+Et0/0                    0        0/0       0/0           0       0/0            0           0
+  Hello-interval is 5, Hold-time is 15
+  Split-horizon is enabled
+  Next xmit serial <none>
+  Packetized sent/expedited: 0/0
+  Hello's sent/expedited: 15/1
+  Un/reliable mcasts: 0/0  Un/reliable ucasts: 0/0
+  Mcast exceptions: 0  CR packets: 0  ACKs suppressed: 0
+  Retransmissions sent: 0  Out-of-sequence rcvd: 0
+  Topology-ids on interface - 0
+  Authentication mode is HMAC-SHA-256, key-chain is not set
+Router#debug eigrp packets
+    (UPDATE, REQUEST, QUERY, REPLY, HELLO, UNKNOWN, PROBE, ACK, STUB, SIAQUERY, SIAREPLY)
+EIGRP Packet debugging is on
+Router#
+*Dec  3 19:47:04.312: EIGRP: Sending HELLO on Et0/0 - paklen 76
+*Dec  3 19:47:04.312:   AS 10, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#
+*Dec  3 19:47:09.035: EIGRP: Sending HELLO on Et0/0 - paklen 76
+*Dec  3 19:47:09.035:   AS 10, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#
+*Dec  3 19:47:13.831: EIGRP: Sending HELLO on Et0/0 - paklen 76
+*Dec  3 19:47:13.831:   AS 10, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#no deb
+Router#no debug ei
+Router#no debug eigrp p
+*Dec  3 19:47:18.648: EIGRP: Sending HELLO on Et0/0 - paklen 76
+*Dec  3 19:47:18.648:   AS 10, Flags 0x0:(NULL), Seq 0/0 interfaceQ 0/0 iidbQ un/rely 0/0
+Router#no debug eigrp packets
+EIGRP Packet debugging is off
+Router#
+
+
+
+
+
+
+$ ./start-2.sh                                                                                                                                                     ⏎
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        10:0/0
+
+...
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+
+Press RETURN to get started!
+
+
+*Dec  3 17:53:16.103: %CTS-6-ENV_DATA_START_STATE: Environment Data Download in start state
+*Dec  3 17:53:16.471: Installing default VOIPHA services
+
+Router>en
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 10.0.0.2 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router eigrp test
+Router(config-router)#address-family ipv4 unicast autonomous-system 10
+Router(config-router-af)#af-interface Ethernet0/0
+Router(config-router-af-interface)#authentication mode hmac-sha-256 password12345
+Router(config-router-af-interface)#exit-af-interface
+Router(config-router-af)#topology base
+Router(config-router-af-topology)#exit-af-topology
+Router(config-router-af)#network 10.0.0.0
+Router(config-router-af)#exit-address-family
+*Dec  3 19:53:23.509: %DUAL-5-NBRCHANGE: EIGRP-IPv4 10: Neighbor 10.0.0.1 (Ethernet0/0) is up: new adjacency
+Router(config-router-af)#exit-address-family
+Router(config-router)#
+
+
+
+
+Locating internal SHA-256 implementation
+----------------------------------------
+
+https://polarssl.org/sha-256-source-code
+
+Try locating "sha256_process" by searching for constants like "0xBEF9A3F7".
+They are found in the data section. Find the "DATA XREF" ("sha256_process") and
+then find the "CODE XREF" ("sha256_update").
+
+Fun Stuff
+---------
+
+Router(config-if)#ip hold-time eigrp 42 8
