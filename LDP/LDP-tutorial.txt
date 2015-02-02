@@ -1,0 +1,927 @@
+$ ./start-1.sh
+***************************************************************
+IOS On Unix - Cisco Systems confidential, internal use only
+Under no circumstances is this software to be provided to any
+non Cisco staff or customers.  To do so is likely to result
+in disciplinary action. Please refer to the IOU Usage policy at
+wwwin-iou.cisco.com for more information.
+***************************************************************
+Port 0/0 is connected to:
+        20:0/0
+...
+Router>en
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface e0/0
+Router(config-if)#ip add 172.16.21.1 255.255.255.252
+Router(config-if)#no shut
+Router(config-if)#mpls label protocol ldp
+Router(config-if)#mpls ip
+*Feb  2 21:29:11.234: %LDP-5-NBRCHG: LDP Neighbor 172.16.21.2:0 (1) is UP
+Router(config-if)#end
+Router#sh mpls ldp neighbor
+    Peer LDP Ident: 172.16.21.2:0; Local LDP Ident 172.16.21.1:0
+        TCP connection: 172.16.21.2.35131 - 172.16.21.1.646
+        State: Oper; Msgs sent/rcvd: 4/4; Downstream
+        Up time: 00:00:15
+        LDP discovery sources:
+          Ethernet0/0, Src IP addr: 172.16.21.2
+        Addresses bound to peer LDP Ident:
+          172.16.21.2
+
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface lo0
+*Feb  2 21:31:54.489: %LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback0, changed state to up
+Router(config-if)#ip address 1.1.1.1 255.255.255.255
+Router(config-if)#exit
+Router(config)#mpls ldp router-id lo0 force
+Router(config)#
+*Feb  2 21:32:15.451: %TDP-5-INFO: default: TDP ID removed
+*Feb  2 21:32:15.451: %LDP-5-NBRCHG: LDP Neighbor 172.16.21.2:0 (1) is DOWN (LDP Router ID changed)
+...
+
+Router(config)#router ospf 1
+Router(config-router)#network 0.0.0.0 255.255.255.255 area 0
+Router(config-router)#end
+*Feb  2 21:36:43.507: %OSPF-5-ADJCHG: Process 1, Nbr 2.2.2.2 on Ethernet0/0 from LOADING to FULL, Loading Done
+*Feb  2 21:36:48.565: %LDP-5-NBRCHG: LDP Neighbor 2.2.2.2:0 (1) is UP
+Router#sh ip route 2.2.2.2
+Routing entry for 2.2.2.2/32
+  Known via "ospf 1", distance 110, metric 11, type intra area
+  Last update from 172.16.21.2 on Ethernet0/0, 00:00:02 ago
+  Routing Descriptor Blocks:
+  * 172.16.21.2, from 2.2.2.2, 00:00:02 ago, via Ethernet0/0
+      Route metric is 11, traffic share count is 1
+Router#sh ip route 2.2.2.2
+Routing entry for 2.2.2.2/32
+  Known via "ospf 1", distance 110, metric 11, type intra area
+  Last update from 172.16.21.2 on Ethernet0/0, 00:00:04 ago
+  Routing Descriptor Blocks:
+  * 172.16.21.2, from 2.2.2.2, 00:00:04 ago, via Ethernet0/0
+      Route metric is 11, traffic share count is 1
+
+Router#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#mpls ldp neighbor 2.2.2.2 password cisco123
+Router(config)#end
+Router#
+*Feb  2 21:38:26.827: %SYS-5-CONFIG_I: Configured from console by console
+...
+
+Router#configure t
+Router(config)#do clear mpls ldp neighbor *
+Router(config)#end
+*Feb  2 21:44:40.754: %LDP-5-CLEAR_NBRS: Clear LDP neighbors (*) by console
+*Feb  2 21:44:40.758: %LDP-5-NBRCHG: LDP Neighbor 2.2.2.2:0 (1) is DOWN (User cleared session manually)
+Router(config)#end
+*Feb  2 21:44:42.865: %SYS-5-CONFIG_I: Configured from console by console
+*Feb  2 21:44:43.120: %LDP-5-NBRCHG: LDP Neighbor 2.2.2.2:0 (2) is UP
+Router#conf t
+Router(config)#mpls ldp neighbor 2.2.2.2 password password123
+Router(config)#end
+*Feb  2 21:44:55.145: %LDP-5-PWDCFG: Password configuration changed for 2.2.2.2:0
+Router(config)#do clear mpls ldp neighbor *
+Router(config)#
+*Feb  2 21:45:01.689: %LDP-5-CLEAR_NBRS: Clear LDP neighbors (*) by console
+*Feb  2 21:45:01.693: %LDP-5-NBRCHG: LDP Neighbor 2.2.2.2:0 (2) is DOWN (User cleared session manually)
+Router(config)#end
+Router#
+*Feb  2 21:45:05.721: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Feb  2 21:45:05.931: %TCP-6-BADAUTH: Invalid MD5 digest from 2.2.2.2(38848) to 1.1.1.1(646) tableid - 0
+Router#
+*Feb  2 21:45:09.935: %TCP-6-BADAUTH: Invalid MD5 digest from 2.2.2.2(38848) to 1.1.1.1(646) tableid - 0
+Router#
+*Feb  2 21:45:17.942: %TCP-6-BADAUTH: Invalid MD5 digest from 2.2.2.2(38848) to 1.1.1.1(646) tableid - 0
+...
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#mpls ldp neighbor 2.2.2.2 password password123
+*Feb  2 21:48:40.571: %TCP-6-BADAUTH: Invalid MD5 digest from 2.2.2.2(30718) to 1.1.1.1(646) tableid - 0
+Router(config)#mpls ldp neighbor 2.2.2.2 password password
+Router(config)#end
+Router#
+*Feb  2 21:48:44.328: %LDP-5-PWDCFG: Password configuration changed for 2.2.2.2:0
+Router#
+*Feb  2 21:48:45.856: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Feb  2 21:48:48.623: %LDP-5-NBRCHG: LDP Neighbor 2.2.2.2:0 (1) is UP
+
+...
+
+
+$ ./start-2.sh
+...
+Router>en
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface e0/0
+Router(config-if)#ip add 172.16.21.2 255.255.255.252
+Router(config-if)#no shut
+Router(config-if)#mpls label protocol ldp
+Router(config-if)#mpls label protocol ldp
+Router(config-if)#mpls ip
+Router(config-if)#end
+Router#
+*Feb  2 21:29:10.694: %SYS-5-CONFIG_I: Configured from console by console
+*Feb  2 21:29:11.212: %LDP-5-NBRCHG: LDP Neighbor 172.16.21.1:0 (1) is UP
+...
+*Feb  2 21:32:15.451: %LDP-5-NBRCHG: LDP Neighbor 172.16.21.1:0 (1) is DOWN (TCP connection closed by peer)
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#int lo0
+Router(config-if)#ip address 2.2.2.2 255.255.255.255
+Router(config-if)#exit
+Router(config)#mpls ldp router-id lo0 force
+Router(config)#
+*Feb  2 21:33:22.226: %TDP-5-INFO: default: TDP ID removed
+Router(config)#end
+Router#
+*Feb  2 21:33:28.972: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+
+Router(config)#mpls ldp neighbor 1.1.1.1 password password
+Router(config)#end
+Router#
+*Feb  2 21:42:49.865: %SYS-5-CONFIG_I: Configured from console by console
+Router#sh mpls ldp neighbor
+...
+Router#debug ip tcp transactions
+TCP special event debugging is on
+Router#
+*Feb  2 21:44:40.758: TCP0: FIN processed
+*Feb  2 21:44:40.758: TCP0: state was ESTAB -> CLOSEWAIT [12998 -> 1.1.1.1(646)]
+*Feb  2 21:44:40.758: TCP0: state was CLOSEWAIT -> LASTACK [12998 -> 1.1.1.1(646)]
+*Feb  2 21:44:40.758: TCP0: sending FIN
+*Feb  2 21:44:40.758: %LDP-5-NBRCHG: LDP Neighbor 1.1.1.1:0 (1) is DOWN (TCP connection closed by peer)
+Router#
+*Feb  2 21:44:40.758: TCP0: Got ACK for our FIN
+*Feb  2 21:44:40.758: TCP0: state was LASTACK -> CLOSED [12998 -> 1.1.1.1(646)]
+*Feb  2 21:44:40.758: Released port 12998 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:44:40.758: TCB 0xF4160B98 destroyed
+Router#
+*Feb  2 21:44:43.057: TCBF55E5B80 created
+*Feb  2 21:44:43.057: TCBF55E5B80 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:44:43.057: TCBF55E5B80 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:44:43.057: TCBF55E5B80 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:44:43.057: TCBF55E5B80 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:44:43.057: TCBF55E5B80 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:44:43.057:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:44:43.057: TCP: Random local port generated 55589, network 1
+*Feb  2 21:44:43.057: TCBF55E5B80 bound to 2.2.2.2.55589
+*Feb  2 21:44:43.057: Reserved port 55589 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:44:43.057: TCBF55E5B80 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:44:43.057: TCP: sending SYN, seq 2186974489, ack 0
+*Feb  2 21:44:43.057: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 002C
+*Feb  2 21:44:43.057: 	and tcp header:
+	D9 25 02 86 82 5A 95 19 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:44:43.057: 	and key 'password'
+*Feb  2 21:44:43.057: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:44:43.057: TCP0: state was CLOSED -> SYNSENT [55589 -> 1.1.1.1(646)]
+*Feb  2 21:44:43.057: TCP0: received md5 string: B9 AE 8C 00 DD 81 41 CF 11 A0 F2 B0 8D 61 B6 BE
+*Feb  2 21:44:43.057: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:44:43.057: 	and tcp header:
+	02 86 D9 25 00 00 00 00 82 5A 95 1A A0 14 00 00 00 00 00 00
+*Feb  2 21:44:43.057: 	and key 'password'
+*Feb  2 21:44:43.057: TCP0: calculated md5 string: B9 AE 8C 00 DD 81 41 CF 11 A0 F2 B0 8D 61 B6 BE
+*Feb  2 21:44:43.057: Released port 55589 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:44:43.057: TCP0: state was SYNSENT -> CLOSED [55589 -> 1.1.1.1(646)]
+*Feb  2 21:44:43.057: TCP0: bad seg from 1.1.1.1 -- closing connection: port 55589 seq 0 ack 2186974490 rcvnxt 0 rcvwnd 0 len 0
+*Feb  2 21:44:43.057: TCP0: connection closed - remote sent RST
+*Feb  2 21:44:43.057: TCB 0xF55E5B80 destroyed
+*Feb  2 21:44:43.074: TCBF55E5B80 created
+*Feb  2 21:44:43.074: TCBF55E5B80 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:44:43.074: TCBF55E5B80 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:44:43.074: TCBF55E5B80 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:44:43.074: TCBF55E5B80 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:44:43.074: TCBF55E5B80 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:44:43.074:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:44:43.074: TCP: Random local port generated 42776, network 1
+*Feb  2 21:44:43.074: TCBF55E5B80 bound to 2.2.2.2.42776
+*Feb  2 21:44:43.074: Reserved port 42776 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:44:43.074: TCBF55E5B80 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:44:43.074: TCP: sending SYN, seq 2934610394, ack 0
+*Feb  2 21:44:43.074: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 002C
+*Feb  2 21:44:43.074: 	and tcp header:
+	A7 18 02 86 AE EA 99 DA 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:44:43.074: 	and key 'password'
+*Feb  2 21:44:43.074: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:44:43.074: TCP0: state was CLOSED -> SYNSENT [42776 -> 1.1.1.1(646)]
+*Feb  2 21:44:43.074: TCP0: received md5 string: 8A 8A E7 A4 5C 4A D8 B2 D5 7F B1 92 73 32 38 42
+*Feb  2 21:44:43.074: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 002C
+*Feb  2 21:44:43.074: 	and tcp header:
+	02 86 A7 18 5B C7 71 DA AE EA 99 DB B0 12 10 20 00 00 00 00
+*Feb  2 21:44:43.074: 	and key 'password'
+*Feb  2 21:44:43.074: TCP0: calculated md5 string: 8A 8A E7 A4 5C 4A D8 B2 D5 7F B1 92 73 32 38 42
+*Feb  2 21:44:43.074: TCP0: state was SYNSENT -> ESTAB [42776 -> 1.1.1.1(646)]
+*Feb  2 21:44:43.074: TCP: tcb F55E5B80 connection to 1.1.1.1:646, peer MSS 536, MSS is 536
+*Feb  2 21:44:43.074: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 0028
+*Feb  2 21:44:43.074: 	and tcp header:
+	A7 18 02 86 AE EA 99 DB 5B C7 71 DB A0 10 10 20 00 00 00 00
+*Feb  2 21:44:43.074: 	and key 'password'
+*Feb  2 21:44:43.091: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 0060
+*Feb  2 21:44:43.091: 	and tcp header:
+	A7 18 02 86 AE EA 99 DB 5B C7 71 DB A0 10 10 20 00 00 00 00
+*Feb  2 21:44:43.091: 	and 56 more bytes at F3E0323C (tcp F3E03214): 00 01 00 34 02 02 02 02 00 00 02 00 00 2A 00 00
+*Feb  2 21:44:43.091: 00 17 05 00 00 0E 00 01 00 B4 00 00 00 00 01 01
+*Feb  2 21:44:43.091: 01 01 00 00 85 06 00 01 80 85 08 00 01 80 85 09
+*Feb  2 21:44:43.091: 00 01 80 85 0B 00 01 80
+*Feb  2 21:44:43.091:
+*Feb  2 21:44:43.091: 	and key 'password'
+*Feb  2 21:44:43.091: TCP0: received md5 string: 47 C3 33 96 3E 4E 90 EE C5 82 8E 78 83 8E 6B 5A
+*Feb  2 21:44:43.091: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:44:43.091: 	and tcp header:
+	02 86 A7 18 5B C7 71 DB AE EA 9A 13 A0 10 0F E8 00 00 00 00
+*Feb  2 21:44:43.091: 	and key 'password'
+*Feb  2 21:44:43.091: TCP0: calculated md5 string: 47 C3 33 96 3E 4E 90 EE C5 82 8E 78 83 8E 6B 5A
+*Feb  2 21:44:43.103: TCP0: received md5 string: 92 44 99 DE 0E D5 46 36 AF 93 99 C4 77 2E 99 91
+*Feb  2 21:44:43.103: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0068
+*Feb  2 21:44:43.103: 	and tcp header:
+	02 86 A7 18 5B C7 71 DB AE EA 9A 13 A0 10 0F E8 00 00 00 00
+*Feb  2 21:44:43.103: 	and 64 more bytes at F1916B0C (tcp F1916AE4): 00 01 00 3C 01 01 01 01 00 00 02 00 00 2A 00 00
+*Feb  2 21:44:43.103: 00 18 05 00 00 0E 00 01 00 B4 00 00 00 00 02 02
+*Feb  2 21:44:43.104: 02 02 00 00 85 06 00 01 80 85 08 00 01 80 85 09
+*Feb  2 21:44:43.104: 00 01 80 85 0B 00 01 80 02 01 00 04 00 00 00 19
+*Feb  2 21:44:43.104:
+*Feb  2 21:44:43.104: 	and key 'password'
+*Feb  2 21:44:43.104: TCP0: calculated md5 string: 92 44 99 DE 0E D5 46 36 AF 93 99 C4 77 2E 99 91
+*Feb  2 21:44:43.104: %LDP-5-NBRCHG: LDP Neighbor 1.1.1.1:0 (2) is UP
+*Feb  2 21:44:43.120: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 00AE
+*Feb  2 21:44:43.120: 	and tcp header:
+	A7 18 02 86 AE EA 9A 13 5B C7 72 1B A0 10 0F E0 00 00 00 00
+*Feb  2 21:44:43.120: 	and 134 more bytes at F3E04EA4 (tcp F3E04E7C): 00 01 00 0E 02 02 02 02 00 00 02 01 00 04 00 00
+*Feb  2 21:44:43.120: 00 18 00 01 00 70 02 02 02 02 00 00 03 00 00 12
+*Feb  2 21:44:43.120: 00 00 00 19 01 01 00 0A 00 01 AC 10 15 02 02 02
+*Feb  2 21:44:43.120: 02 02 04 00 00 18 00 00 00 1A 01 00 00 08 02 00
+*Feb  2 21:44:43.120: 01 1E AC 10 15 00 02 00 00 04 00 00 00 03 04 00
+*Feb  2 21:44:43.120: 00 18 00 00 00 1B 01 00 00 08 02 00 01 20 02 02
+*Feb  2 21:44:43.120: 02 02 02 00 00 04 00 00 00 03 04 00 00 18 00 00
+*Feb  2 21:44:43.120: 00 1C 01 00 00 08 02 00 01 20 01 01 01 01 02 00
+*Feb  2 21:44:43.120: 00 04 00 00 00 10
+*Feb  2 21:44:43.120:
+*Feb  2 21:44:43.120: 	and key 'password'
+*Feb  2 21:44:43.137: TCP0: received md5 string: 68 9F 5C ED 67 3C 70 0B A5 25 B1 50 60 29 26 6C
+*Feb  2 21:44:43.137: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 009C
+*Feb  2 21:44:43.137: 	and tcp header:
+	02 86 A7 18 5B C7 72 1B AE EA 9A 99 A0 10 0F 62 00 00 00 00
+*Feb  2 21:44:43.137: 	and 116 more bytes at F48D3544 (tcp F48D351C): 00 01 00 70 01 01 01 01 00 00 03 00 00 12 00 00
+*Feb  2 21:44:43.137: 00 1A 01 01 00 0A 00 01 AC 10 15 01 01 01 01 01
+*Feb  2 21:44:43.137: 04 00 00 18 00 00 00 1B 01 00 00 08 02 00 01 1E
+*Feb  2 21:44:43.137: AC 10 15 00 02 00 00 04 00 00 00 03 04 00 00 18
+*Feb  2 21:44:43.137: 00 00 00 1C 01 00 00 08 02 00 01 20 01 01 01 01
+*Feb  2 21:44:43.137: 02 00 00 04 00 00 00 03 04 00 00 18 00 00 00 1D
+*Feb  2 21:44:43.137: 01 00 00 08 02 00 01 20 02 02 02 02 02 00 00 04
+*Feb  2 21:44:43.137: 00 00 00 10
+*Feb  2 21:44:43.137:
+*Feb  2 21:44:43.137: 	and key 'password'
+*Feb  2 21:44:43.137: TCP0: calculated md5 string: 68 9F 5C ED 67 3C 70 0B A5 25 B1 50 60 29 26 6C
+*Feb  2 21:44:43.342: TCP0: ACK timeout timer expired
+Router#
+*Feb  2 21:44:43.342: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 0028
+*Feb  2 21:44:43.342: 	and tcp header:
+	A7 18 02 86 AE EA 9A 99 5B C7 72 8F A0 10 0F 6C 00 00 00 00
+*Feb  2 21:44:43.342: 	and key 'password'
+Router#
+*Feb  2 21:45:01.693: TCP0: received md5 string: BD 76 10 9A CA 13 F4 73 C4 92 D3 10 6D F7 C7 6A
+*Feb  2 21:45:01.693: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:45:01.693: 	and tcp header:
+	02 86 A7 18 5B C7 72 8F AE EA 9A 99 A0 19 0F 62 00 00 00 00
+*Feb  2 21:45:01.693: 	and key 'password'
+*Feb  2 21:45:01.693: TCP0: calculated md5 string: BD 76 10 9A CA 13 F4 73 C4 92 D3 10 6D F7 C7 6A
+*Feb  2 21:45:01.693: TCP0: FIN processed
+*Feb  2 21:45:01.693: TCP0: state was ESTAB -> CLOSEWAIT [42776 -> 1.1.1.1(646)]
+*Feb  2 21:45:01.693: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 0028
+*Feb  2 21:45:01.693: 	and tcp header:
+	A7 18 02 86 AE EA 9A 99 5B C7 72 90 A0 10 0F 6C 00 00 00 00
+*Feb  2 21:45:01.693: 	and key 'password'
+*Feb  2 21:45:01.694: TCP0: state was CLOSEWAIT -> LASTACK [42776 -> 1.1.1.1(646)]
+*Feb  2 21:45:01.694: digesting pseudo-header: src F55E5B88 dst F55E5BA4 proto 0006 tcplen 0028
+*Feb  2 21:45:01.694: 	and tcp header:
+	A7 18 02 86 AE EA 9A 99 5B C7 72 90 A0 19 0F 6C 00 00 00 00
+*Feb  2 21:45:01.694: 	and key 'password'
+*Feb  2 21:45:01.694: TCP0: sending FIN
+*Feb  2 21:45:01.694: %LDP-5-NBRCHG: LDP Neighbor 1.1.1.1:0 (2) is DOWN (TCP connection closed by peer)
+*Feb  2 21:45:01.694: TCP0: received md5 string: E1 C3 71 73 8F EC F1 D2 D9 09 8A 7D FF BD DD BD
+*Feb  2 21:45:01.694: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:45:01.694: 	and tcp header:
+	02 86 A7 18 5B C7 72 90 AE EA 9A 9A A0 10 0F 62 00 00 00 00
+*Feb  2 21:45:01.694: 	and key 'password'
+*Feb  2 21:45:01.694: TCP0: calculated md5 string: E1 C3 71 73 8F EC F1 D2 D9 09 8A 7D FF BD DD BD
+*Feb  2 21:45:01.694: TCP0: Got ACK for our FIN
+*Feb  2 21:45:01.694: TCP0: state was LASTACK -> CLOSED [42776 -> 1.1.1.1(646)]
+*Feb  2 21:45:01.694: Released port 42776 in Transport Port Agent for TCP IP type 1 delay 240000
+Router#
+*Feb  2 21:45:01.694: TCB 0xF55E5B80 destroyed
+Router#
+*Feb  2 21:45:03.926: TCBF55E5698 created
+*Feb  2 21:45:03.926: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:45:03.926: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:45:03.926: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:45:03.926: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:45:03.926: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:45:03.926:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:45:03.926: TCP: Random local port generated 38848, network 1
+*Feb  2 21:45:03.926: TCBF55E5698 bound to 2.2.2.2.38848
+*Feb  2 21:45:03.926: Reserved port 38848 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:45:03.926: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:45:03.926: TCP: sending SYN, seq 4038148811, ack 0
+*Feb  2 21:45:03.926: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:45:03.926: 	and tcp header:
+	97 C0 02 86 F0 B1 42 CB 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:45:03.926: 	and key 'password'
+*Feb  2 21:45:03.926: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:45:03.926: TCP0: state was CLOSED -> SYNSENT [38848 -> 1.1.1.1(646)]
+*Feb  2 21:45:03.926: TCP0: received md5 string: A0 18 5F F3 32 DF 27 D1 EF 6E 3B C5 7A 31 C6 2E
+*Feb  2 21:45:03.926: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:45:03.926: 	and tcp header:
+	02 86 97 C0 00 00 00 00 F0 B1 42 CC A0 14 00 00 00 00 00 00
+*Feb  2 21:45:03.926: 	and key 'password'
+*Feb  2 21:45:03.927: TCP0: calculated md5 string: C1 F5 89 5C 69 48 32 B2 EC D2 6B 2B 23 B9 34 ED
+*Feb  2 21:45:03.927: %TCP-6-BADAUTH: Invalid MD5 digest from 1.1.1.1(646) to 2.2.2.2(38848) (RST) tableid - 0
+Router#
+*Feb  2 21:45:03.927: TCP0: bad seg from 1.1.1.1 -- Invalid MD5 string: port 38848 seq 0 ack 4038148812 rcvnxt 0 rcvwnd 4128 len 0
+Router#
+*Feb  2 21:45:05.931: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:05.931: 2.2.2.2:38848 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:45:05.931: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:45:05.931: TCP0: timeout #1 - timeout is 4000 ms, seq 4038148811
+*Feb  2 21:45:05.931: TCP: (38848) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:09.935: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:09.935: TCP0: timeout #2 - timeout is 8000 ms, seq 4038148811
+*Feb  2 21:45:09.935: TCP: (38848) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:17.942: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:17.942: TCP0: timeout #3 - timeout is 15984 ms, seq 4038148811
+*Feb  2 21:45:17.942: TCP: (38848) -> 1.1.1.1(646)
+*Feb  2 21:45:18.932: Released port 38848 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:45:18.932: TCP0: state was SYNSENT -> CLOSED [38848 -> 1.1.1.1(646)]
+*Feb  2 21:45:18.932: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:45:21.205: TCBF55E5698 created
+*Feb  2 21:45:21.205: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:45:21.205: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:45:21.205: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:45:21.205: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:45:21.205: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:45:21.205:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:45:21.205: TCP: Random local port generated 38612, network 1
+*Feb  2 21:45:21.205: TCBF55E5698 bound to 2.2.2.2.38612
+Router#
+*Feb  2 21:45:21.205: Reserved port 38612 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:45:21.205: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:45:21.205: TCP: sending SYN, seq 2859830301, ack 0
+*Feb  2 21:45:21.205: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:45:21.205: 	and tcp header:
+	96 D4 02 86 AA 75 8C 1D 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:45:21.205: 	and key 'password'
+*Feb  2 21:45:21.205: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:45:21.205: TCP0: state was CLOSED -> SYNSENT [38612 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:45:23.208: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:23.208: 2.2.2.2:38612 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:45:23.208: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:45:23.208: TCP0: timeout #1 - timeout is 4000 ms, seq 2859830301
+*Feb  2 21:45:23.208: TCP: (38612) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:27.210: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:27.210: TCP0: timeout #2 - timeout is 8000 ms, seq 2859830301
+*Feb  2 21:45:27.210: TCP: (38612) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:35.215: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:35.215: TCP0: timeout #3 - timeout is 15990 ms, seq 2859830301
+*Feb  2 21:45:35.215: TCP: (38612) -> 1.1.1.1(646)
+*Feb  2 21:45:36.210: Released port 38612 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:45:36.210: TCP0: state was SYNSENT -> CLOSED [38612 -> 1.1.1.1(646)]
+*Feb  2 21:45:36.210: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:45:39.287: TCBF55E5698 created
+*Feb  2 21:45:39.287: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:45:39.287: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:45:39.287: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:45:39.287: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:45:39.287: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:45:39.287:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:45:39.287: TCP: Random local port generated 57513, network 1
+*Feb  2 21:45:39.287: TCBF55E5698 bound to 2.2.2.2.57513
+Router#
+*Feb  2 21:45:39.287: Reserved port 57513 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:45:39.287: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:45:39.287: TCP: sending SYN, seq 2910868147, ack 0
+*Feb  2 21:45:39.287: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:45:39.287: 	and tcp header:
+	E0 A9 02 86 AD 80 52 B3 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:45:39.287: 	and key 'password'
+*Feb  2 21:45:39.287: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:45:39.287: TCP0: state was CLOSED -> SYNSENT [57513 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:45:41.290: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:41.290: 2.2.2.2:57513 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:45:41.291: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:45:41.291: TCP0: timeout #1 - timeout is 4000 ms, seq 2910868147
+*Feb  2 21:45:41.291: TCP: (57513) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:45.290: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:45.290: TCP0: timeout #2 - timeout is 8000 ms, seq 2910868147
+*Feb  2 21:45:45.290: TCP: (57513) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:45:53.296: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:53.297: TCP0: timeout #3 - timeout is 15991 ms, seq 2910868147
+*Feb  2 21:45:53.297: TCP: (57513) -> 1.1.1.1(646)
+*Feb  2 21:45:54.292: Released port 57513 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:45:54.292: TCP0: state was SYNSENT -> CLOSED [57513 -> 1.1.1.1(646)]
+*Feb  2 21:45:54.292: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:45:55.785: TCBF55E6280 created
+*Feb  2 21:45:55.785: TCBF55E6280 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:45:55.785: TCBF55E6280 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:45:55.785: TCBF55E6280 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:45:55.785: TCBF55E6280 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:45:55.785: TCBF55E6280 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:45:55.785:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:45:55.785: TCP: Random local port generated 21959, network 1
+*Feb  2 21:45:55.785: TCBF55E6280 bound to 2.2.2.2.21959
+Router#
+*Feb  2 21:45:55.785: Reserved port 21959 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:45:55.785: TCBF55E6280 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:45:55.785: TCP: sending SYN, seq 1550381932, ack 0
+*Feb  2 21:45:55.785: digesting pseudo-header: src F55E6288 dst F55E62A4 proto 0006 tcplen 002C
+*Feb  2 21:45:55.785: 	and tcp header:
+	55 C7 02 86 5C 68 F3 6C 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:45:55.785: 	and key 'password'
+*Feb  2 21:45:55.785: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:45:55.785: TCP0: state was CLOSED -> SYNSENT [21959 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:45:57.789: TCP0: RETRANS timeout timer expired
+*Feb  2 21:45:57.789: 2.2.2.2:21959 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:45:57.789: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:45:57.789: TCP0: timeout #1 - timeout is 4000 ms, seq 1550381932
+*Feb  2 21:45:57.789: TCP: (21959) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:01.789: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:01.789: TCP0: timeout #2 - timeout is 8000 ms, seq 1550381932
+*Feb  2 21:46:01.789: TCP: (21959) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:09.793: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:09.794: TCP0: timeout #3 - timeout is 15992 ms, seq 1550381932
+*Feb  2 21:46:09.794: TCP: (21959) -> 1.1.1.1(646)
+*Feb  2 21:46:10.789: Released port 21959 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:46:10.789: TCP0: state was SYNSENT -> CLOSED [21959 -> 1.1.1.1(646)]
+*Feb  2 21:46:10.789: TCB 0xF55E6280 destroyed
+Router#
+*Feb  2 21:46:13.136: TCBF55E6280 created
+*Feb  2 21:46:13.136: TCBF55E6280 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:46:13.136: TCBF55E6280 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:46:13.136: TCBF55E6280 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:46:13.136: TCBF55E6280 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:46:13.136: TCBF55E6280 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:46:13.136:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:46:13.136: TCP: Random local port generated 48127, network 1
+*Feb  2 21:46:13.136: TCBF55E6280 bound to 2.2.2.2.48127
+Router#
+*Feb  2 21:46:13.136: Reserved port 48127 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:46:13.136: TCBF55E6280 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:46:13.136: TCP: sending SYN, seq 1305715522, ack 0
+*Feb  2 21:46:13.136: digesting pseudo-header: src F55E6288 dst F55E62A4 proto 0006 tcplen 002C
+*Feb  2 21:46:13.136: 	and tcp header:
+	BB FF 02 86 4D D3 A3 42 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:46:13.136: 	and key 'password'
+*Feb  2 21:46:13.136: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:46:13.136: TCP0: state was CLOSED -> SYNSENT [48127 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:46:15.137: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:15.137: 2.2.2.2:48127 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:46:15.137: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:46:15.137: TCP0: timeout #1 - timeout is 4000 ms, seq 1305715522
+*Feb  2 21:46:15.137: TCP: (48127) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:19.139: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:19.139: TCP0: timeout #2 - timeout is 8000 ms, seq 1305715522
+*Feb  2 21:46:19.139: TCP: (48127) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:27.143: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:27.143: TCP0: timeout #3 - timeout is 15993 ms, seq 1305715522
+*Feb  2 21:46:27.143: TCP: (48127) -> 1.1.1.1(646)
+*Feb  2 21:46:28.143: Released port 48127 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:46:28.143: TCP0: state was SYNSENT -> CLOSED [48127 -> 1.1.1.1(646)]
+*Feb  2 21:46:28.143: TCB 0xF55E6280 destroyed
+Router#
+*Feb  2 21:46:30.218: TCBF55E6280 created
+*Feb  2 21:46:30.218: TCBF55E6280 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:46:30.218: TCBF55E6280 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:46:30.218: TCBF55E6280 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:46:30.218: TCBF55E6280 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:46:30.218: TCBF55E6280 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:46:30.218:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:46:30.218: TCP: Random local port generated 65057, network 1
+*Feb  2 21:46:30.218: TCBF55E6280 bound to 2.2.2.2.65057
+Router#
+*Feb  2 21:46:30.218: Reserved port 65057 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:46:30.218: TCBF55E6280 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:46:30.218: TCP: sending SYN, seq 3221786447, ack 0
+*Feb  2 21:46:30.218: digesting pseudo-header: src F55E6288 dst F55E62A4 proto 0006 tcplen 002C
+*Feb  2 21:46:30.218: 	and tcp header:
+	FE 21 02 86 C0 08 8F 4F 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:46:30.218: 	and key 'password'
+*Feb  2 21:46:30.218: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:46:30.218: TCP0: state was CLOSED -> SYNSENT [65057 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:46:32.226: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:32.226: 2.2.2.2:65057 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:46:32.226: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:46:32.226: TCP0: timeout #1 - timeout is 4000 ms, seq 3221786447
+*Feb  2 21:46:32.226: TCP: (65057) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:36.227: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:36.227: TCP0: timeout #2 - timeout is 8000 ms, seq 3221786447
+*Feb  2 21:46:36.227: TCP: (65057) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:44.233: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:44.233: TCP0: timeout #3 - timeout is 15985 ms, seq 3221786447
+*Feb  2 21:46:44.233: TCP: (65057) -> 1.1.1.1(646)
+*Feb  2 21:46:45.224: Released port 65057 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:46:45.224: TCP0: state was SYNSENT -> CLOSED [65057 -> 1.1.1.1(646)]
+*Feb  2 21:46:45.225: TCB 0xF55E6280 destroyed
+Router#
+*Feb  2 21:46:47.354: TCBF55E6280 created
+*Feb  2 21:46:47.354: TCBF55E6280 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:46:47.354: TCBF55E6280 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:46:47.354: TCBF55E6280 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:46:47.354: TCBF55E6280 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:46:47.354: TCBF55E6280 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:46:47.354:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:46:47.354: TCP: Random local port generated 38329, network 1
+*Feb  2 21:46:47.354: TCBF55E6280 bound to 2.2.2.2.38329
+Router#
+*Feb  2 21:46:47.354: Reserved port 38329 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:46:47.354: TCBF55E6280 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:46:47.354: TCP: sending SYN, seq 2082387505, ack 0
+*Feb  2 21:46:47.354: digesting pseudo-header: src F55E6288 dst F55E62A4 proto 0006 tcplen 002C
+*Feb  2 21:46:47.354: 	and tcp header:
+	95 B9 02 86 7C 1E B6 31 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:46:47.354: 	and key 'password'
+*Feb  2 21:46:47.354: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:46:47.354: TCP0: state was CLOSED -> SYNSENT [38329 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:46:49.357: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:49.357: 2.2.2.2:38329 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:46:49.357: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:46:49.357: TCP0: timeout #1 - timeout is 4000 ms, seq 2082387505
+*Feb  2 21:46:49.357: TCP: (38329) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:46:53.363: TCP0: RETRANS timeout timer expired
+*Feb  2 21:46:53.363: TCP0: timeout #2 - timeout is 8000 ms, seq 2082387505
+*Feb  2 21:46:53.363: TCP: (38329) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:01.369: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:01.369: TCP0: timeout #3 - timeout is 15985 ms, seq 2082387505
+*Feb  2 21:47:01.369: TCP: (38329) -> 1.1.1.1(646)
+*Feb  2 21:47:02.357: Released port 38329 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:47:02.357: TCP0: state was SYNSENT -> CLOSED [38329 -> 1.1.1.1(646)]
+*Feb  2 21:47:02.357: TCB 0xF55E6280 destroyed
+Router#
+*Feb  2 21:47:04.432: TCBF55E5698 created
+*Feb  2 21:47:04.432: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:47:04.432: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:47:04.432: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:47:04.432: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:47:04.432: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:47:04.432:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:47:04.432: TCP: Random local port generated 15412, network 1
+*Feb  2 21:47:04.432: TCBF55E5698 bound to 2.2.2.2.15412
+Router#
+*Feb  2 21:47:04.432: Reserved port 15412 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:47:04.432: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:47:04.432: TCP: sending SYN, seq 1437556196, ack 0
+*Feb  2 21:47:04.432: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:47:04.432: 	and tcp header:
+	3C 34 02 86 55 AF 5D E4 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:47:04.432: 	and key 'password'
+*Feb  2 21:47:04.432: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:47:04.432: TCP0: state was CLOSED -> SYNSENT [15412 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:47:06.434: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:06.434: 2.2.2.2:15412 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:47:06.434: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:47:06.434: TCP0: timeout #1 - timeout is 4000 ms, seq 1437556196
+*Feb  2 21:47:06.434: TCP: (15412) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:10.435: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:10.435: TCP0: timeout #2 - timeout is 8000 ms, seq 1437556196
+*Feb  2 21:47:10.435: TCP: (15412) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:18.441: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:18.441: TCP0: timeout #3 - timeout is 15991 ms, seq 1437556196
+*Feb  2 21:47:18.441: TCP: (15412) -> 1.1.1.1(646)
+*Feb  2 21:47:19.432: Released port 15412 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:47:19.432: TCP0: state was SYNSENT -> CLOSED [15412 -> 1.1.1.1(646)]
+*Feb  2 21:47:19.432: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:47:22.671: TCBF55E5698 created
+*Feb  2 21:47:22.671: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:47:22.671: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:47:22.671: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:47:22.671: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:47:22.671: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:47:22.671:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:47:22.671: TCP: Random local port generated 62063, network 1
+*Feb  2 21:47:22.671: TCBF55E5698 bound to 2.2.2.2.62063
+Router#
+*Feb  2 21:47:22.671: Reserved port 62063 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:47:22.671: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:47:22.671: TCP: sending SYN, seq 2495388912, ack 0
+*Feb  2 21:47:22.671: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:47:22.671: 	and tcp header:
+	F2 6F 02 86 94 BC 9C F0 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:47:22.671: 	and key 'password'
+*Feb  2 21:47:22.671: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:47:22.671: TCP0: state was CLOSED -> SYNSENT [62063 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:47:24.674: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:24.674: 2.2.2.2:62063 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:47:24.674: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:47:24.674: TCP0: timeout #1 - timeout is 4000 ms, seq 2495388912
+*Feb  2 21:47:24.674: TCP: (62063) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:28.674: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:28.675: TCP0: timeout #2 - timeout is 8000 ms, seq 2495388912
+*Feb  2 21:47:28.675: TCP: (62063) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:36.680: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:36.680: TCP0: timeout #3 - timeout is 15991 ms, seq 2495388912
+*Feb  2 21:47:36.680: TCP: (62063) -> 1.1.1.1(646)
+*Feb  2 21:47:37.676: Released port 62063 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:47:37.676: TCP0: state was SYNSENT -> CLOSED [62063 -> 1.1.1.1(646)]
+*Feb  2 21:47:37.676: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:47:40.575: TCBF55E5698 created
+*Feb  2 21:47:40.575: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:47:40.575: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:47:40.575: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:47:40.575: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:47:40.575: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:47:40.575:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:47:40.575: TCP: Random local port generated 41689, network 1
+*Feb  2 21:47:40.575: TCBF55E5698 bound to 2.2.2.2.41689
+Router#
+*Feb  2 21:47:40.575: Reserved port 41689 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:47:40.575: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:47:40.575: TCP: sending SYN, seq 2836407930, ack 0
+*Feb  2 21:47:40.575: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:47:40.575: 	and tcp header:
+	A2 D9 02 86 A9 10 26 7A 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:47:40.575: 	and key 'password'
+*Feb  2 21:47:40.575: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:47:40.575: TCP0: state was CLOSED -> SYNSENT [41689 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:47:42.580: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:42.580: 2.2.2.2:41689 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:47:42.580: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:47:42.580: TCP0: timeout #1 - timeout is 4000 ms, seq 2836407930
+*Feb  2 21:47:42.580: TCP: (41689) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:46.584: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:46.584: TCP0: timeout #2 - timeout is 8000 ms, seq 2836407930
+*Feb  2 21:47:46.584: TCP: (41689) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:47:54.588: TCP0: RETRANS timeout timer expired
+*Feb  2 21:47:54.588: TCP0: timeout #3 - timeout is 15987 ms, seq 2836407930
+*Feb  2 21:47:54.588: TCP: (41689) -> 1.1.1.1(646)
+*Feb  2 21:47:55.580: Released port 41689 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:47:55.580: TCP0: state was SYNSENT -> CLOSED [41689 -> 1.1.1.1(646)]
+*Feb  2 21:47:55.580: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:47:58.589: TCBF55E5698 created
+*Feb  2 21:47:58.589: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:47:58.589: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:47:58.589: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:47:58.589: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:47:58.589: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:47:58.589:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:47:58.589: TCP: Random local port generated 19335, network 1
+*Feb  2 21:47:58.589: TCBF55E5698 bound to 2.2.2.2.19335
+Router#
+*Feb  2 21:47:58.589: Reserved port 19335 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:47:58.589: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:47:58.589: TCP: sending SYN, seq 1596015017, ack 0
+*Feb  2 21:47:58.589: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:47:58.589: 	and tcp header:
+	4B 87 02 86 5F 21 41 A9 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:47:58.589: 	and key 'password'
+*Feb  2 21:47:58.589: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:47:58.589: TCP0: state was CLOSED -> SYNSENT [19335 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:48:00.593: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:00.593: 2.2.2.2:19335 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:48:00.593: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:48:00.593: TCP0: timeout #1 - timeout is 4000 ms, seq 1596015017
+*Feb  2 21:48:00.593: TCP: (19335) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:04.600: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:04.600: TCP0: timeout #2 - timeout is 8000 ms, seq 1596015017
+*Feb  2 21:48:04.600: TCP: (19335) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:12.605: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:12.605: TCP0: timeout #3 - timeout is 15984 ms, seq 1596015017
+*Feb  2 21:48:12.605: TCP: (19335) -> 1.1.1.1(646)
+*Feb  2 21:48:13.596: Released port 19335 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:48:13.596: TCP0: state was SYNSENT -> CLOSED [19335 -> 1.1.1.1(646)]
+*Feb  2 21:48:13.596: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:48:16.082: TCBF55E5698 created
+*Feb  2 21:48:16.082: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:48:16.082: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:48:16.082: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:48:16.082: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:48:16.082: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:48:16.082:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:48:16.082: TCP: Random local port generated 46398, network 1
+*Feb  2 21:48:16.082: TCBF55E5698 bound to 2.2.2.2.46398
+Router#
+*Feb  2 21:48:16.083: Reserved port 46398 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:48:16.083: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:48:16.083: TCP: sending SYN, seq 2802085242, ack 0
+*Feb  2 21:48:16.083: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:48:16.083: 	and tcp header:
+	B5 3E 02 86 A7 04 6D 7A 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:48:16.083: 	and key 'password'
+*Feb  2 21:48:16.083: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:48:16.083: TCP0: state was CLOSED -> SYNSENT [46398 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:48:18.090: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:18.090: 2.2.2.2:46398 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:48:18.090: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:48:18.090: TCP0: timeout #1 - timeout is 4000 ms, seq 2802085242
+*Feb  2 21:48:18.090: TCP: (46398) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:22.097: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:22.097: TCP0: timeout #2 - timeout is 8000 ms, seq 2802085242
+*Feb  2 21:48:22.097: TCP: (46398) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:30.104: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:30.104: TCP0: timeout #3 - timeout is 15979 ms, seq 2802085242
+*Feb  2 21:48:30.104: TCP: (46398) -> 1.1.1.1(646)
+*Feb  2 21:48:31.086: Released port 46398 in Transport Port Agent for TCP IP type 1 delay 240000
+*Feb  2 21:48:31.086: TCP0: state was SYNSENT -> CLOSED [46398 -> 1.1.1.1(646)]
+*Feb  2 21:48:31.086: TCB 0xF55E5698 destroyed
+Router#
+*Feb  2 21:48:34.559: TCBF55E5698 created
+*Feb  2 21:48:34.559: TCBF55E5698 setting property TCP_VRFTABLEID (20) F4BA05C4
+*Feb  2 21:48:34.559: TCBF55E5698 setting property TCP_NONBLOCKING_READ (14) F4BA05D4
+*Feb  2 21:48:34.559: TCBF55E5698 setting property TCP_NONBLOCKING_WRITE (10) F4BA05D4
+*Feb  2 21:48:34.559: TCBF55E5698 setting property TCP_TOS (11) F4BA05D0
+*Feb  2 21:48:34.559: TCBF55E5698 setting property TCP_MD5KEY_ROLLOVER (46) F4BA04A4
+*Feb  2 21:48:34.559:  tcp_uniqueport: using ephemeral max 65535
+*Feb  2 21:48:34.559: TCP: Random local port generated 30718, network 1
+*Feb  2 21:48:34.559: TCBF55E5698 bound to 2.2.2.2.30718
+Router#
+*Feb  2 21:48:34.559: Reserved port 30718 in Transport Port Agent for TCP IP type 1
+*Feb  2 21:48:34.559: TCBF55E5698 getting property TCP_STRICT_ADDR_BIND (19)
+*Feb  2 21:48:34.559: TCP: sending SYN, seq 2842932819, ack 0
+*Feb  2 21:48:34.559: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 002C
+*Feb  2 21:48:34.559: 	and tcp header:
+	77 FE 02 86 A9 73 B6 53 00 00 00 00 B0 02 10 20 00 00 00 00
+*Feb  2 21:48:34.559: 	and key 'password'
+*Feb  2 21:48:34.559: TCP0: Connection to 1.1.1.1:646, advertising MSS 536
+*Feb  2 21:48:34.559: TCP0: state was CLOSED -> SYNSENT [30718 -> 1.1.1.1(646)]
+Router#
+*Feb  2 21:48:36.563: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:36.563: 2.2.2.2:30718 <---> 1.1.1.1:646   congestion window changes
+*Feb  2 21:48:36.563: cwnd from 536 to 536, ssthresh from 65535 to 1072
+*Feb  2 21:48:36.563: TCP0: timeout #1 - timeout is 4000 ms, seq 2842932819
+*Feb  2 21:48:36.563: TCP: (30718) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:40.571: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:40.571: TCP0: timeout #2 - timeout is 8000 ms, seq 2842932819
+*Feb  2 21:48:40.571: TCP: (30718) -> 1.1.1.1(646)
+Router#
+*Feb  2 21:48:48.577: TCP0: RETRANS timeout timer expired
+*Feb  2 21:48:48.577: TCP0: timeout #3 - timeout is 15982 ms, seq 2842932819
+*Feb  2 21:48:48.577: TCP: (30718) -> 1.1.1.1(646)
+*Feb  2 21:48:48.577: TCP0: received md5 string: 4D 72 4F 31 74 EE 3F 7E 55 C0 CB 34 5A AE 0C 9F
+*Feb  2 21:48:48.577: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 002C
+*Feb  2 21:48:48.577: 	and tcp header:
+	02 86 77 FE 00 19 9A 6F A9 73 B6 54 B0 12 10 20 00 00 00 00
+*Feb  2 21:48:48.577: 	and key 'password'
+*Feb  2 21:48:48.577: TCP0: calculated md5 string: 4D 72 4F 31 74 EE 3F 7E 55 C0 CB 34 5A AE 0C 9F
+*Feb  2 21:48:48.577: TCP0: state was SYNSENT -> ESTAB [30718 -> 1.1.1.1(646)]
+*Feb  2 21:48:48.577: TCP: tcb F55E5698 connection to 1.1.1.1:646, peer MSS 536, MSS is 536
+*Feb  2 21:48:48.577: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 0028
+*Feb  2 21:48:48.577: 	and tcp header:
+	77 FE 02 86 A9 73 B6 54 00 19 9A 70 A0 10 10 20 00 00 00 00
+*Feb  2 21:48:48.577: 	and key 'password'
+*Feb  2 21:48:48.589: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 0060
+*Feb  2 21:48:48.589: 	and tcp header:
+	77 FE 02 86 A9 73 B6 54 00 19 9A 70 A0 10 10 20 00 00 00 00
+*Feb  2 21:48:48.589: 	and 56 more bytes at F3E051CC (tcp F3E051A4): 00 01 00 34 02 02 02 02 00 00 02 00 00 2A 00 00
+*Feb  2 21:48:48.589: 00 29 05 00 00 0E 00 01 00 B4 00 00 00 00 01 01
+*Feb  2 21:48:48.589: 01 01 00 00 85 06 00 01 80 85 08 00 01 80 85 09
+*Feb  2 21:48:48.589: 00 01 80 85 0B 00 01 80
+*Feb  2 21:48:48.589:
+*Feb  2 21:48:48.589: 	and key 'password'
+*Feb  2 21:48:48.590: TCP0: received md5 string: 7F 99 E5 39 C4 5C E8 16 8D 96 34 61 D9 D8 D5 9C
+*Feb  2 21:48:48.590: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+*Feb  2 21:48:48.590: 	and tcp header:
+	02 86 77 FE 00 19 9A 70 A9 73 B6 8C A0 10 0F E8 00 00 00 00
+*Feb  2 21:48:48.590: 	and key 'password'
+*Feb  2 21:48:48.590: TCP0: calculated md5 string: 7F 99 E5 39 C4 5C E8 16 8D 96 34 61 D9 D8 D5 9C
+*Feb  2 21:48:48.606: TCP0: received md5 string: B9 FE BF EA 83 1E 1E 1B CA 2C 9B E6 6D 68 ED BF
+*Feb  2 21:48:48.606: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0068
+*Feb  2 21:48:48.606: 	and tcp header:
+	02 86 77 FE 00 19 9A 70 A9 73 B6 8C A0 10 0F E8 00 00 00 00
+*Feb  2 21:48:48.606: 	and 64 more bytes at F62500C4 (tcp F625009C): 00 01 00 3C 01 01 01 01 00 00 02 00 00 2A 00 00
+*Feb  2 21:48:48.606: 00 1E 05 00 00 0E 00 01 00 B4 00 00 00 00 02 02
+*Feb  2 21:48:48.606: 02 02 00 00 85 06 00 01 80 85 08 00 01 80 85 09
+*Feb  2 21:48:48.606: 00 01 80 85 0B 00 01 80 02 01 00 04 00 00 00 1F
+*Feb  2 21:48:48.606:
+*Feb  2 21:48:48.606: 	and key 'password'
+*Feb  2 21:48:48.606: TCP0: calculated md5 string: B9 FE BF EA 83 1E 1E 1B CA 2C 9B E6 6D 68 ED BF
+*Feb  2 21:48:48.606: %LDP-5-NBRCHG: LDP Neighbor 1.1.1.1:0 (1) is UP
+*Feb  2 21:48:48.623: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 00AE
+*Feb  2 21:48:48.623: 	and tcp header:
+	77 FE 02 86 A9 73 B6 8C 00 19 9A B0 A0 10 0F E0 00 00 00 00
+*Feb  2 21:48:48.623: 	and 134 more bytes at F191731C (tcp F19172F4): 00 01 00 0E 02 02 02 02 00 00 02 01 00 04 00 00
+*Feb  2 21:48:48.623: 00 2A 00 01 00 70 02 02 02 02 00 00 03 00 00 12
+*Feb  2 21:48:48.623: 00 00 00 2B 01 01 00 0A 00 01 AC 10 15 02 02 02
+*Feb  2 21:48:48.623: 02 02 04 00 00 18 00 00 00 2C 01 00 00 08 02 00
+*Feb  2 21:48:48.623: 01 1E AC 10 15 00 02 00 00 04 00 00 00 03 04 00
+*Feb  2 21:48:48.623: 00 18 00 00 00 2D 01 00 00 08 02 00 01 20 02 02
+*Feb  2 21:48:48.623: 02 02 02 00 00 04 00 00 00 03 04 00 00 18 00 00
+*Feb  2 21:48:48.623: 00 2E 01 00 00 08 02 00 01 20 01 01 01 01 02 00
+*Feb  2 21:48:48.623: 00 04 00 00 00 10
+*Feb  2 21:48:48.623:
+*Feb  2 21:48:48.623: 	and key 'password'
+*Feb  2 21:48:48.640: TCP0: received md5 string: 13 D1 3B F8 AF 40 05 73 87 78 D1 F0 87 FE 87 83
+*Feb  2 21:48:48.640: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 009C
+*Feb  2 21:48:48.640: 	and tcp header:
+	02 86 77 FE 00 19 9A B0 A9 73 B7 12 A0 10 0F 62 00 00 00 00
+*Feb  2 21:48:48.640: 	and 116 more bytes at F48D1F2C (tcp F48D1F04): 00 01 00 70 01 01 01 01 00 00 03 00 00 12 00 00
+*Feb  2 21:48:48.640: 00 20 01 01 00 0A 00 01 AC 10 15 01 01 01 01 01
+*Feb  2 21:48:48.640: 04 00 00 18 00 00 00 21 01 00 00 08 02 00 01 1E
+*Feb  2 21:48:48.640: AC 10 15 00 02 00 00 04 00 00 00 03 04 00 00 18
+*Feb  2 21:48:48.640: 00 00 00 22 01 00 00 08 02 00 01 20 01 01 01 01
+*Feb  2 21:48:48.640: 02 00 00 04 00 00 00 03 04 00 00 18 00 00 00 23
+*Feb  2 21:48:48.640: 01 00 00 08 02 00 01 20 02 02 02 02 02 00 00 04
+*Feb  2 21:48:48.640: 00 00 00 10
+*Feb  2 21:48:48.640:
+*Feb  2 21:48:48.640: 	and key 'password'
+*Feb  2 21:48:48.640: TCP0: calculated md5 string: 13 D1 3B F8 AF 40 05 73 87 78 D1 F0 87 FE 87 83
+*Feb  2 21:48:48.845: TCP0: ACK timeout timer expired
+Router#
+*Feb  2 21:48:48.845: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 0028
+*Feb  2 21:48:48.845: 	and tcp header:
+	77 FE 02 86 A9 73 B7 12 00 19 9B 24 A0 10 0F 6C 00 00 00 00
+*Feb  2 21:48:48.845: 	and key 'password'
+Router#debug ip tcp transactions
+*Feb  2 21:49:45.001: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 003A
+*Feb  2 21:49:45.001: 	and tcp header:
+	77 FE 02 86 A9 73 B7 12 00 19 9B 24 A0 10 0F 6C 00 00 00 00
+*Feb  2 21:49:45.001: 	and 18 more bytes at F3E028C4 (tcp F3E0289C): 00 01 00 0E 02 02 02 02 00 00 02 01 00 04 00 00
+*Feb  2 21:49:45.001: 00 2F
+*Feb  2 21:49:45.001:
+*Feb  2 21:49:45.001: 	and key 'password'
+*Feb  2 21:49:45.206: TCP0: received md5 string: 42 AA 03 FB E2 DE 64 D5 15 2D C7 84 E2 F2 63 79
+*Feb  2 21:49:45.206: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 0028
+Router#debug ip tcp transactions
+*Feb  2 21:49:45.206: 	and tcp header:
+	02 86 77 FE 00 19 9B 24 A9 73 B7 24 A0 10 0F 50 00 00 00 00
+*Feb  2 21:49:45.206: 	and key 'password'
+*Feb  2 21:49:45.206: TCP0: calculated md5 string: 42 AA 03 FB E2 DE 64 D5 15 2D C7 84 E2 F2 63 79
+*Feb  2 21:49:46.487: TCP0: received md5 string: FE 11 F7 51 C5 77 9C C7 82 AF 2A B9 F8 2C F1 D8
+*Feb  2 21:49:46.487: digesting pseudo-header: src F2B1DF3C dst F2B1DF58 proto 0006 tcplen 003A
+*Feb  2 21:49:46.487: 	and tcp header:
+	02 86 77 FE 00 19 9B 24 A9 73 B7 24 A0 10 0F 50 00 00 00 00
+*Feb  2 21:49:46.487: 	and 18 more bytes at F190D04C (tcp F190D024): 00 01 00 0E 01 01 01 01 00 00 02 01 00 04 00 00
+*Feb  2 21:49:46.487: 00 24
+*Feb  2 21:49:46.487:
+*Feb  2 21:49:46.487: 	and key 'password'
+*Feb  2 21:49:46.487: TCP0: calculated md5 string: FE 11 F7 51 C5 77 9C C7 82 AF 2A B9 F8 2C F1 D8
+*Feb  2 21:49:46.688: TCP0: ACK timeout timer expired
+Router#debug ip tcp transactions
+*Feb  2 21:49:46.688: digesting pseudo-header: src F55E56A0 dst F55E56BC proto 0006 tcplen 0028
+*Feb  2 21:49:46.688: 	and tcp header:
+	77 FE 02 86 A9 73 B7 24 00 19 9B 36 A0 10 0F 5A 00 00 00 00
+*Feb  2 21:49:46.688: 	and key 'password'
+
+Notes
+-----
+
+"debug ip tcp transactions" is magical ;)
+
+After all this research, it seems that LDP MD5 authentication relies on "TCP
+MD5 Signature Option", which is already supported by JtR.
+
+Sniffing
+--------
+
+$ cat NETMAP
+10:0/0 20:0/0 1
+
+$ ./iousniff -i /tmp/netio1000 -s . -f
+
+
+Thanks
+------
+
+Thanks to Markus Wirth for writing an awesome tutorial on LDP.
