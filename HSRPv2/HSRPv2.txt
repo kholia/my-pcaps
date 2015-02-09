@@ -1,0 +1,198 @@
+$  ./start-1.sh
+***************************************************************
+...
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.4(1)T, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Sat 23-Nov-13 03:28 by prod_rel_team
+
+
+This product contains cryptographic features and is subject to United
+States and local country laws governing import, export, transfer and
+use. Delivery of Cisco cryptographic products does not imply
+third-party authority to import, export, distribute or use encryption.
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+
+Linux Unix (Intel-x86) processor with 104952K bytes of memory.
+Processor board ID 2048010
+8 Ethernet interfaces
+8 Serial interfaces
+64K bytes of NVRAM.
+
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+
+Press RETURN to get started!
+
+
+*Feb  9 11:47:12.287: %CTS-6-ENV_DATA_START_STATE: Environment Data Download in start state
+*Feb  9 11:47:12.601: Installing default VOIPHA services
+
+*Feb  9 11:47:13.168: %LINEPROTO-5-UPDOWN: Line protocol on Interface VoIP-Null0, changed state to up
+*Feb  9 11:47:14.175: %LINK-3-UPDOWN: Interface Ethernet0/0, changed state to up
+*Feb  9 11:47:14.184: %LINK-3-UPDOWN: Interface Ethernet0/1, changed state to up
+*Feb  9 11:47:14.193: %LINK-3-UPDOWN: Interface Ethernet0/2, changed state to up
+*Feb  9 11:47:14.202: %LINK-3-UPDOWN: Interface Ethernet0/3, changed state to up
+*Feb  9 11:47:14.215: %LINK-3-UPDOWN: Interface Ethernet1/0, changed state to up
+*Feb  9 11:47:14.223: %LINK-3-UPDOWN: Interface Ethernet1/1, changed state to up
+*Feb  9 11:47:14.236: %LINK-3-UPDOWN: Interface Ethernet1/2, changed state to up
+*Feb  9 11:47:14.241: %LINK-3-UPDOWN: Interface Ethernet1/3, changed state to up
+*Feb  9 11:47:14.245: %LINK-3-UPDOWN: Interface Serial2/0, changed state to up
+*Feb  9 11:47:14.246: %LINK-3-UPDOWN: Interface Serial2/1, changed state to up
+*Feb  9 11:47:14.254: %LINK-3-UPDOWN: Interface Serial2/2, changed state to up
+*Feb  9 11:47:14.255: %LINK-3-UPDOWN: Interface Serial2/3, changed state to up
+*Feb  9 11:47:14.255: %LINK-3-UPDOWN: Interface Serial3/0, changed state to up
+*Feb  9 11:47:14.255: %LINK-3-UPDOWN: Interface Serial3/1, changed state to up
+*Feb  9 11:47:14.255: %LINK-3-UPDOWN: Interface Serial3/2, changed state to up
+*Feb  9 11:47:14.263: %LINK-3-UPDOWN: Interface Serial3/3, changed state to up
+*Feb  9 11:47:15.177: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/0, changed state to up
+...
+
+Router>en
+Router#configure t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#ip address 10.0.0.10 255.255.255.0
+Router(config-if)#standby 1 priority 100
+Router(config-if)#standby 1 preempt
+Router(config-if)#standby 1 authentication md5 key-string password12345
+Router(config-if)#standby 1 ip 10.0.0.100
+Router(config-if)#standby version 2
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#
+*Feb  9 11:55:18.549: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Feb  9 11:55:19.956: %LINK-3-UPDOWN: Interface Ethernet0/0, changed state to up
+*Feb  9 11:55:20.957: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/0, changed state to up
+Router#
+*Feb  9 11:55:39.826: %HSRP-5-STATECHANGE: Ethernet0/0 Grp 1 state Standby -> Active
+Router#debug ip tcp transactions
+TCP special event debugging is on
+Router#
+Router(config)#interface e
+Router(config)#interface ethernet0/0
+Router(config-if)#standby 1 authentication md5 key-string password
+Router(config-if)#end
+Router#
+*Feb  9 12:04:25.826: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+Router#
+*Feb  9 12:04:26.121: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.20
+...
+*Feb  9 12:04:56.988: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.20
+Router#
+
+
+
+
+
+$ ./start-2.sh
+...
+
+
+Cisco IOS Software, Linux Software (I86BI_LINUX-ADVENTERPRISEK9-M), Version 15.4(1)T, DEVELOPMENT TEST SOFTWARE
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2013 by Cisco Systems, Inc.
+Compiled Sat 23-Nov-13 03:28 by prod_rel_team
+
+
+This product contains cryptographic features and is subject to United
+States and local country laws governing import, export, transfer and
+use. Delivery of Cisco cryptographic products does not imply
+third-party authority to import, export, distribute or use encryption.
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+
+Linux Unix (Intel-x86) processor with 104952K bytes of memory.
+Processor board ID 2048020
+8 Ethernet interfaces
+8 Serial interfaces
+64K bytes of NVRAM.
+
+
+         --- System Configuration Dialog ---
+
+Would you like to enter the initial configuration dialog? [yes/no]: no
+
+
+Press RETURN to get started!
+
+
+*Feb  9 11:47:14.266: %CTS-6-ENV_DATA_START_STATE: Environment Data Download in start state
+*Feb  9 11:47:14.584: Installing default VOIPHA services
+
+*Feb  9 11:47:15.142: %LINEPROTO-5-UPDOWN: Line protocol on Interface VoIP-Null0, changed state to up
+*Feb  9 11:47:16.151: %LINK-3-UPDOWN: Interface Ethernet0/0, changed state to up
+*Feb  9 11:47:16.160: %LINK-3-UPDOWN: Interface Ethernet0/1, changed state to up
+*Feb  9 11:47:16.168: %LINK-3-UPDOWN: Interface Ethernet0/2, changed state to up
+*Feb  9 11:47:16.177: %LINK-3-UPDOWN: Interface Ethernet0/3, changed state to up
+*Feb  9 11:47:16.186: %LINK-3-UPDOWN: Interface Ethernet1/0, changed state to up
+*Feb  9 11:47:16.195: %LINK-3-UPDOWN: Interface Ethernet1/1, changed state to up
+*Feb  9 11:47:16.207: %LINK-3-UPDOWN: Interface Ethernet1/2, changed state to up
+*Feb  9 11:47:16.220: %LINK-3-UPDOWN: Interface Ethernet1/3, changed state to up
+*Feb  9 11:47:16.220: %LINK-3-UPDOWN: Interface Serial2/0, changed state to up
+*Feb  9 11:47:16.220: %LINK-3-UPDOWN: Interface Serial2/1, changed state to up
+*Feb  9 11:47:16.221: %LINK-3-UPDOWN: Interface Serial2/2, changed state to up
+*Feb  9 11:47:16.225: %LINK-3-UPDOWN: Interface Serial2/3, changed state to up
+*Feb  9 11:47:16.233: %LINK-3-UPDOWN: Interface Serial3/0, changed state to up
+*Feb  9 11:47:16.234: %LINK-3-UPDOWN: Interface Serial3/1, changed state to up
+*Feb  9 11:47:16.234: %LINK-3-UPDOWN: Interface Serial3/2, changed state to up
+*Feb  9 11:47:16.234: %LINK-3-UPDOWN: Interface Serial3/3, changed state to up
+...
+Router>en
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface Ethernet0/0
+Router(config-if)#no shutdown
+Router(config-if)#ip address 10.0.0.20 255.255.255.0
+Router(config-if)#standby 1 priority 200
+Router(config-if)#standby 1 authentication md5 key-string password12345
+Router(config-if)#standby version 2
+Router(config-if)#standby 1 ip 10.0.0.100
+Router(config-if)#end
+Router#
+*Feb  9 11:59:41.860: %SYS-5-CONFIG_I: Configured from console by console
+Router#
+*Feb  9 12:00:01.357: %HSRP-5-STATECHANGE: Ethernet0/0 Grp 1 state Speak -> Standby
+...
+Router#
+*Feb  9 12:04:35.189: %HSRP-5-STATECHANGE: Ethernet0/0 Grp 1 state Standby -> Active
+Router#
+*Feb  9 12:04:58.681: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:05:31.036: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:06:03.648: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:06:36.001: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:07:06.257: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:07:38.371: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:08:10.505: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:08:40.655: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
+Router#
+*Feb  9 12:09:13.187: %HSRP-4-BADAUTH2: Bad authentication from 10.0.0.10
