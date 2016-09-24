@@ -1,0 +1,33 @@
+$ cat hook.py
+
+from __future__ import print_function
+import frida
+import sys
+
+session = frida.attach(int(sys.argv[1]))  # PID of the IOU process
+print(session.enumerate_modules())
+
+script = session.create_script("""
+Interceptor.attach(ptr("%s"), {
+    onEnter: function(args) {
+        send(args[0].toInt32());
+    }
+});
+""" % int(sys.argv[2], 16))  # address of the function to hook
+def on_message(message, data):
+    print(message)
+script.on('message', on_message)
+script.load()
+sys.stdin.read()
+
+Use this script (python hook.py 28111 0xacd15fc) to attach to the IOU process
+and find the module name (i86bi-linux-l2-adventerprisek9-15.6.0.9S.bin) and the
+base address (0x8048000).
+
+From analysis in IDA Pro we know the address of the "MD5_Update" function
+(0xacd15fc). Function address - Base address (0xacd15fc - 0x8048000) gives us a
+relative offset of 0x2c895fc.
+
+Start tracing the "MD5_Update" function by executing,
+
+frida-trace -a 'i86bi-linux-l2-adventerprisek9-15.6.0.9S.bin!0x2c895fc' `pidof IOU.bin`
