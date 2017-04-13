@@ -1,0 +1,54 @@
+$ cat start-R1.sh
+#!/bin/bash
+
+LD_LIBRARY_PATH=. ./IOS.bin -c R1 10
+
+
+$ ./start-R2.sh  # required to get packets flowing
+...
+
+
+$ ./start-R1.sh
+...
+Router>en
+Router#conf t
+Router(config)#interface ethernet0/0
+Router(config-if)#ip address 10.0.0.10 255.255.255.0
+Router(config-if)#no shutdown
+Router(config-if)#vrrp 1 priority 200
+Router(config-if)#vrrp 1 timers advertise 3
+Router(config-if)#vrrp 1 timers learn
+Router(config-if)#vrrp 1 ip 10.0.0.30
+Router(config-if)#vrrp 1 authentication md5 key-string 0 123456789
+Router(config-if)#end
+*Apr 13 09:35:05.852: %VRRP-6-STATECHANGE: Et0/0 Grp 1 state Init -> Backup
+Router(config-if)#end
+...
+Router(config-if)#vrrp 1 authentication md5 key-string 0 password12345
+Router(config-if)#end
+Router#
+*Apr 13 09:37:52.951: %SYS-5-CONFIG_I: Configured from console by console
+
+Router#debug vrrp auth
+*Apr 15 13:59:55.825:
+*Apr 15 13:59:55.826: VRRP: Sent: 2101C801FE0300000A00001E0000000000000000
+*Apr 15 13:59:55.826: VRRP: HshC: 19B30F74C7BA6486CED3151A50514B79
+Router#
+*Apr 15 13:59:58.536:
+*Apr 15 13:59:58.536: VRRP: Sent: 2101C801FE0300000A00001E0000000000000000
+*Apr 15 13:59:58.536: VRRP: HshC: 19B30F74C7BA6486CED3151A50514B79
+Router#
+
+On R2,
+
+Router#debug vrrp auth
+VRRP Authentication debugging is on
+Router#
+*Apr 15 14:01:13.832:
+*Apr 15 14:01:13.832: VRRP: Rcvd: 2101C801FE0300000A00001E0000000000000000
+*Apr 15 14:01:13.832: VRRP: HshC: 19B30F74C7BA6486CED3151A50514B79
+*Apr 15 14:01:13.832: VRRP: HshR: 19B30F74C7BA6486CED3151A50514B79
+Router#
+
+
+Thanks to Peter Wu for telling me about the "debug vrrp auth" feature.
