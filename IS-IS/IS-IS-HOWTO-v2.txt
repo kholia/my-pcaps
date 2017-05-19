@@ -1,0 +1,67 @@
+$ cat NETMAP
+10:0/0 20:0/0 1
+
+$ cat start-R1.sh
+#!/bin/bash
+
+LD_LIBRARY_PATH=. ./IOS.bin -c R1 10
+
+
+$ ./start-R1.sh
+Router>en
+Router#conf t
+Router(config)#interface ethernet 0/0
+Router(config-if)#ip address 10.3.3.1 255.255.255.0
+Router(config-if)#ip router isis
+Router(config-if)#isis password SECr3t
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#conf t
+Router(config)#interface ethernet0/1
+Router(config-if)#ip address 10.1.1.1 255.255.255.0
+Router(config-if)#ip router isis
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#conf t
+Router(config)#router isis
+Router(config-router)#net 49.1234.1111.1111.1111.00
+Router(config-router)#end
+Router#conf t
+Router(config)#key chain hello
+Router(config-keychain)#key 1
+Router(config-keychain-key)#key-string hello
+Router(config-keychain-key)#exit
+Router(config-keychain)#end
+Router#conf t
+Router(config)#router isis
+Router(config-router)#authentication mode md5
+Router(config-router)#authentication key-chain hello
+Router(config-router)#end
+*May 19 14:25:45.458: %CLNS-4-AUTH_FAIL: ISIS: LSP authentication failed
+Router#
+*May 19 14:26:16.644: %CLNS-4-AUTH_FAIL: ISIS: CSNP authentication failed
+
+
+$ ./start-R2.sh
+Router>en
+Router#conf t
+Router(config)#interface ethernet 0/0
+Router(config-if)#ip address 10.3.3.2 255.255.255.0
+Router(config-if)#ip router isis
+Router(config-if)#isis password SECr3t
+Router(config-if)#no shutdown
+Router(config-if)#end
+Router#conf t
+Router(config)#interface ethernet 0/1
+Router(config-if)#ip address 172.16.1.1 255.255.255.0
+Router(config-if)#ip router isis
+Router(config-if)#ip no shutdown
+Router(config-if)#end
+Router#conf t
+Router(config)#router isis
+Router(config-router)#net 49.1234.2222.2222.2222.00
+Router(config-router)#end
+Router#
+
+
+This should be enough to get IS-IS packets flowing.

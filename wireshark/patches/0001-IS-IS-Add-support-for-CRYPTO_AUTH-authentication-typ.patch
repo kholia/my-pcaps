@@ -1,0 +1,185 @@
+From 953164bdb1135c4561363a663a30c74a68240f59 Mon Sep 17 00:00:00 2001
+From: Dhiru Kholia <dhiru.kholia@gmail.com>
+Date: Thu, 18 May 2017 12:45:03 +0530
+Subject: [PATCH] IS-IS: Add support for CRYPTO_AUTH authentication type
+
+CRYPTO_AUTH (generic cryptographic authentication) is documented in
+RFC 5310, https://tools.ietf.org/html/rfc5310.
+
+Sample IS-IS .pcap files using CRYPTO_AUTH (HMAC-SHA1/HMAC-SHA256) can
+be found at https://c0decafe.de/svn/codename_loki/test/.
+
+Change-Id: If25edc5985e13de56ab6bade570f06e0e9db276c
+---
+ epan/dissectors/packet-isis-clv.c   | 33 +++++++++++++++++++++++++++++----
+ epan/dissectors/packet-isis-clv.h   |  2 +-
+ epan/dissectors/packet-isis-hello.c |  2 +-
+ epan/dissectors/packet-isis-lsp.c   |  2 +-
+ epan/dissectors/packet-isis-snp.c   |  2 +-
+ epan/dissectors/packet-isis.c       |  4 ++++
+ epan/dissectors/packet-isis.h       |  2 ++
+ 7 files changed, 39 insertions(+), 8 deletions(-)
+
+diff --git a/epan/dissectors/packet-isis-clv.c b/epan/dissectors/packet-isis-clv.c
+index c7aee55..a78f14a 100644
+--- a/epan/dissectors/packet-isis-clv.c
++++ b/epan/dissectors/packet-isis-clv.c
+@@ -29,6 +29,15 @@
+ #include "packet-isis-clv.h"
+ #include <epan/nlpid.h>
+ 
++static const value_string algorithm_vals[] = {
++    { 20, "hmac-sha1" },
++    { 28, "hmac-sha224" },
++    { 32, "hmac-sha256" },
++    { 48, "hmac-sha384" },
++    { 64, "hmac-sha512" },
++    { 0,  NULL }
++};
++
+ /*
+  * Name: isis_dissect_area_address_clv()
+  *
+@@ -138,8 +147,9 @@ isis_dissect_instance_identifier_clv(proto_tree *tree, packet_info* pinfo, tvbuf
+  *    Take apart the CLV that hold authentication information.  This
+  *    is currently 1 octet auth type.
+  *      the two defined authentication types
+- *      are 1 for a clear text password and
+- *           54 for a HMAC-MD5 digest
++ *      are 1 for a clear text password,
++ *           54 for a HMAC-MD5 digest and
++ *           3 for CRYPTO_AUTH (rfc5310)
+  *
+  * Input:
+  *    tvbuff_t * : tvbuffer for packet data
+@@ -152,10 +162,11 @@ isis_dissect_instance_identifier_clv(proto_tree *tree, packet_info* pinfo, tvbuf
+  */
+ void
+ isis_dissect_authentication_clv(proto_tree *tree, packet_info* pinfo, tvbuff_t *tvb,
+-        int hf_auth_bytes, expert_field* auth_expert, int offset, int length)
++        int hf_auth_bytes, int hf_key_id, expert_field* auth_expert, int offset, int length)
+ {
+     guchar pw_type;
+     int auth_unsupported;
++    const gchar *algorithm = NULL;
+ 
+     if ( length <= 0 ) {
+         return;
+@@ -179,12 +190,26 @@ isis_dissect_authentication_clv(proto_tree *tree, packet_info* pinfo, tvbuff_t *
+     case 54:
+         if ( length == 16 ) {
+             proto_tree_add_bytes_format( tree, hf_auth_bytes, tvb, offset, length,
+-                NULL, "hmac-md5 (54), password (length %d) = %s", length, tvb_bytes_to_str(wmem_packet_scope(), tvb, offset, length));
++                NULL, "hmac-md5 (54), message digest (length %d) = %s", length, tvb_bytes_to_str(wmem_packet_scope(), tvb, offset, length));
+         } else {
+             proto_tree_add_bytes_format( tree, hf_auth_bytes, tvb, offset, length,
+                 NULL, "hmac-md5 (54), illegal hmac-md5 digest format (must be 16 bytes)");
+         }
+         break;
++    case 3:
++        proto_tree_add_item(tree, hf_key_id, tvb, offset, 2, ENC_BIG_ENDIAN);
++        offset += 2;
++        length -= 2;
++        algorithm = try_val_to_str(length, algorithm_vals);
++        if ( algorithm ) {
++            proto_tree_add_bytes_format( tree, hf_auth_bytes, tvb, offset, length,
++                NULL, "CRYPTO_AUTH %s (3), message digest (length %d) = %s", algorithm,
++                length, tvb_bytes_to_str(wmem_packet_scope(), tvb, offset, length));
++        } else {
++            proto_tree_add_bytes_format( tree, hf_auth_bytes, tvb, offset, length,
++                NULL, "CRYPTO_AUTH (3) illegal message digest format");
++        }
++        break;
+     default:
+         proto_tree_add_bytes_format( tree, hf_auth_bytes, tvb, offset, length,
+                 NULL, "type 0x%02x (0x%02x)", pw_type, length);
+diff --git a/epan/dissectors/packet-isis-clv.h b/epan/dissectors/packet-isis-clv.h
+index e2dd805..70b9f0f 100644
+--- a/epan/dissectors/packet-isis-clv.h
++++ b/epan/dissectors/packet-isis-clv.h
+@@ -109,7 +109,7 @@ extern void isis_dissect_mt_clv(tvbuff_t *tvb, packet_info* pinfo, proto_tree *t
+ extern void isis_dissect_hostname_clv(tvbuff_t *tvb, proto_tree *tree,
+         int offset, int length, int tree_id);
+ extern void isis_dissect_authentication_clv(proto_tree *tree, packet_info* pinfo, tvbuff_t *tvb,
+-        int hf_auth_bytes, expert_field* auth_expert, int offset, int length);
++        int hf_auth_bytes, int hf_key_id, expert_field* auth_expert, int offset, int length);
+ extern void isis_dissect_area_address_clv(proto_tree *tree, packet_info* pinfo, tvbuff_t *tvb,
+         expert_field* expert, int hf_area, int offset, int length);
+ extern void isis_dissect_instance_identifier_clv(proto_tree *tree, packet_info* pinfo, tvbuff_t *tvb,
+diff --git a/epan/dissectors/packet-isis-hello.c b/epan/dissectors/packet-isis-hello.c
+index 5038096..b396209 100644
+--- a/epan/dissectors/packet-isis-hello.c
++++ b/epan/dissectors/packet-isis-hello.c
+@@ -663,7 +663,7 @@ static void
+ dissect_hello_authentication_clv(tvbuff_t *tvb, packet_info* pinfo,
+     proto_tree *tree, int offset, int id_length _U_, int length)
+ {
+-    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_hello_authentication, &ei_isis_hello_authentication, offset, length);
++    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_hello_authentication, hf_isis_clv_key_id, &ei_isis_hello_authentication, offset, length);
+ }
+ 
+ /*
+diff --git a/epan/dissectors/packet-isis-lsp.c b/epan/dissectors/packet-isis-lsp.c
+index af71772..53d444d 100644
+--- a/epan/dissectors/packet-isis-lsp.c
++++ b/epan/dissectors/packet-isis-lsp.c
+@@ -2151,7 +2151,7 @@ static void
+ dissect_lsp_authentication_clv(tvbuff_t *tvb, packet_info* pinfo, proto_tree *tree, int offset,
+     int id_length _U_, int length)
+ {
+-    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_lsp_authentication, &ei_isis_lsp_authentication, offset, length);
++    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_lsp_authentication, hf_isis_clv_key_id, &ei_isis_lsp_authentication, offset, length);
+ }
+ 
+ /*
+diff --git a/epan/dissectors/packet-isis-snp.c b/epan/dissectors/packet-isis-snp.c
+index eda2d3b..d392379 100644
+--- a/epan/dissectors/packet-isis-snp.c
++++ b/epan/dissectors/packet-isis-snp.c
+@@ -96,7 +96,7 @@ static void
+ dissect_snp_authentication_clv(tvbuff_t *tvb, packet_info* pinfo, proto_tree *tree, int offset,
+     int id_length _U_, int length)
+ {
+-    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_csnp_authentication, &ei_isis_csnp_authentication, offset, length);
++    isis_dissect_authentication_clv(tree, pinfo, tvb, hf_isis_csnp_authentication, hf_isis_clv_key_id, &ei_isis_csnp_authentication, offset, length);
+ }
+ 
+ static void
+diff --git a/epan/dissectors/packet-isis.c b/epan/dissectors/packet-isis.c
+index 7432173..33d232e 100644
+--- a/epan/dissectors/packet-isis.c
++++ b/epan/dissectors/packet-isis.c
+@@ -49,6 +49,7 @@ static int hf_isis_type_reserved    = -1;
+ static int hf_isis_version2         = -1;
+ static int hf_isis_reserved         = -1;
+ static int hf_isis_max_area_adr     = -1;
++int hf_isis_clv_key_id              = -1;
+ 
+ static gint ett_isis                = -1;
+ 
+@@ -194,6 +195,9 @@ proto_register_isis(void)
+       { "Maximum Area Addresses", "isis.max_area_adr", FT_UINT8, BASE_DEC, NULL,
+         0x0, "Maximum Area Addresses, 0 means 3", HFILL }},
+ 
++    { &hf_isis_clv_key_id,
++      { "Key ID", "isis.clv.key_id", FT_UINT16, BASE_DEC, NULL,
++        0x0, NULL, HFILL }},
+   };
+     /*
+      * Note, we pull in the unknown CLV handler here, since it
+diff --git a/epan/dissectors/packet-isis.h b/epan/dissectors/packet-isis.h
+index 391e538..95b4b5c 100644
+--- a/epan/dissectors/packet-isis.h
++++ b/epan/dissectors/packet-isis.h
+@@ -54,6 +54,8 @@ typedef struct isis_data {
+     guint8 system_id_len;
+ } isis_data_t;
+ 
++extern int hf_isis_clv_key_id;
++
+ #endif /* _PACKET_ISIS_H */
+ 
+ /*
+-- 
+2.7.4
+
