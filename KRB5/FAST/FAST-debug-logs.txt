@@ -1,0 +1,78 @@
+On client machine,
+
+$ kinit -n
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS
+
+Valid starting       Expires              Service principal
+09/04/2017 15:05:22  09/05/2017 01:05:22  krbtgt/EXAMPLE.COM@EXAMPLE.COM
+	renew until 09/05/2017 15:05:22
+
+$ KRB5_TRACE=/dev/stdout kinit -T /tmp/krb5cc_1000 lulu
+[4997] 1504522715.90793: Getting initial credentials for lulu@EXAMPLE.COM
+[4997] 1504522715.92508: FAST armor ccache: /tmp/krb5cc_1000
+[4997] 1504522715.92590: Retrieving WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS -> krb5_ccache_conf_data/fast_avail/krbtgt\/EXAMPLE.COM\@EXAMPLE.COM@X-CACHECONF: from FILE:/tmp/krb5cc_1000 with result: 0/Success
+[4997] 1504522715.92595: Read config in FILE:/tmp/krb5cc_1000 for krbtgt/EXAMPLE.COM@EXAMPLE.COM: fast_avail: yes
+[4997] 1504522715.92598: Using FAST due to armor ccache negotiation result
+[4997] 1504522715.92633: Getting credentials WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS -> krbtgt/EXAMPLE.COM@EXAMPLE.COM using ccache FILE:/tmp/krb5cc_1000
+[4997] 1504522715.92690: Retrieving WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS -> krbtgt/EXAMPLE.COM@EXAMPLE.COM from FILE:/tmp/krb5cc_1000 with result: 0/Success
+[4997] 1504522715.92712: Armor ccache sesion key: aes256-cts/3E0E
+[4997] 1504522715.92753: Creating authenticator for WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS -> krbtgt/EXAMPLE.COM@EXAMPLE.COM, seqnum 0, subkey aes256-cts/6FAE, session key aes256-cts/3E0E
+[4997] 1504522715.92827: FAST armor key: aes256-cts/9886
+[4997] 1504522715.92850: Encoding request body and padata into FAST request
+[4997] 1504522715.92883: Sending request (960 bytes) to EXAMPLE.COM
+[4997] 1504522715.93005: Resolving hostname master.example.com
+[4997] 1504522715.93237: Initiating TCP connection to stream 192.168.124.137:88
+[4997] 1504522715.93822: Sending TCP request to stream 192.168.124.137:88
+[4997] 1504522715.94928: Received answer (633 bytes) from stream 192.168.124.137:88
+[4997] 1504522715.94948: Terminating TCP connection to stream 192.168.124.137:88
+[4997] 1504522717.489399: Response was not from master KDC
+[4997] 1504522717.489457: Received error from KDC: -1765328359/Additional pre-authentication required
+[4997] 1504522717.489514: Decoding FAST response
+[4997] 1504522717.489578: Processing preauth types: 16, 15, 14, 136, 19, 147, 138, 133, 137
+[4997] 1504522717.489585: Selected etype info: etype aes256-cts, salt "EXAMPLE.COMlulu", params ""
+[4997] 1504522717.489587: Received cookie: MIT
+[4997] 1504522717.489599: PKINIT client has no configured identity; giving up
+[4997] 1504522717.489626: Preauth module pkinit (147) (info) returned: 0/Success
+[4997] 1504522717.489632: PKINIT client has no configured identity; giving up
+[4997] 1504522717.489635: Preauth module pkinit (16) (real) returned: 22/Invalid argument
+[4997] 1504522717.489640: PKINIT client has no configured identity; giving up
+[4997] 1504522717.489643: Preauth module pkinit (14) (real) returned: 22/Invalid argument
+[4997] 1504522717.489648: PKINIT client has no configured identity; giving up
+[4997] 1504522717.489651: Preauth module pkinit (14) (real) returned: 22/Invalid argument
+Password for lulu@EXAMPLE.COM:
+[4997] 1504522720.964245: Preauth module encrypted_challenge (138) (real) returned: 0/Success
+[4997] 1504522720.964252: Produced preauth for next request: 133, 138
+[4997] 1504522720.964255: Encoding request body and padata into FAST request
+[4997] 1504522720.964291: Sending request (1059 bytes) to EXAMPLE.COM
+[4997] 1504522720.964312: Resolving hostname master.example.com
+[4997] 1504522720.964405: Initiating TCP connection to stream 192.168.124.137:88
+[4997] 1504522720.964828: Sending TCP request to stream 192.168.124.137:88
+[4997] 1504522720.974505: Received answer (1051 bytes) from stream 192.168.124.137:88
+[4997] 1504522720.974520: Terminating TCP connection to stream 192.168.124.137:88
+[4997] 1504522723.34598: Response was not from master KDC
+[4997] 1504522723.34626: Decoding FAST response
+[4997] 1504522723.34689: Processing preauth types: 19, 138
+[4997] 1504522723.34695: Selected etype info: etype aes256-cts, salt "EXAMPLE.COMlulu", params ""
+[4997] 1504522723.34725: Preauth module encrypted_challenge (138) (real) returned: 0/Success
+[4997] 1504522723.34728: Produced preauth for next request: (empty)
+[4997] 1504522723.34732: AS key determined by preauth: aes256-cts/B6CE
+[4997] 1504522723.34744: FAST reply key: aes256-cts/660B
+[4997] 1504522723.34763: Decrypted AS reply; session key is: aes256-cts/CEFA
+[4997] 1504522723.34772: FAST negotiation: available
+[4997] 1504522723.34782: Initializing FILE:/tmp/krb5cc_1000 with default princ lulu@EXAMPLE.COM
+[4997] 1504522723.35088: Storing lulu@EXAMPLE.COM -> krbtgt/EXAMPLE.COM@EXAMPLE.COM in FILE:/tmp/krb5cc_1000
+[4997] 1504522723.35124: Storing config in FILE:/tmp/krb5cc_1000 for krbtgt/EXAMPLE.COM@EXAMPLE.COM: fast_avail: yes
+[4997] 1504522723.35143: Storing lulu@EXAMPLE.COM -> krb5_ccache_conf_data/fast_avail/krbtgt\/EXAMPLE.COM\@EXAMPLE.COM@X-CACHECONF: in FILE:/tmp/krb5cc_1000
+[4997] 1504522723.35159: Storing config in FILE:/tmp/krb5cc_1000 for krbtgt/EXAMPLE.COM@EXAMPLE.COM: pa_type: 138
+[4997] 1504522723.35173: Storing lulu@EXAMPLE.COM -> krb5_ccache_conf_data/pa_type/krbtgt\/EXAMPLE.COM\@EXAMPLE.COM@X-CACHECONF: in FILE:/tmp/krb5cc_1000
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: lulu@EXAMPLE.COM
+
+Valid starting       Expires              Service principal
+09/04/2017 15:05:47  09/05/2017 01:05:47  krbtgt/EXAMPLE.COM@EXAMPLE.COM
+	renew until 09/05/2017 15:05:43
